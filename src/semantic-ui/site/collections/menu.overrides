@@ -1,0 +1,14 @@
+/*******************************
+         Site Overrides
+*******************************/
+
+/* When a menu item is selected, make it bold */
+.ui.menu > .active.item {
+  font-weight: 700;
+}
+
+/* Not quite sure why they mess with line height in menu items, but
+   makes everything look cramped, so I'm reverting it */
+.ui.menu .item {
+  line-height: unset;
+}

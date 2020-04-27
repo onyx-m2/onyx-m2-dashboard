@@ -1,0 +1,22 @@
+/*******************************
+     User Global Variables
+*******************************/
+
+/* The primary color is the 'Tesla Blue' found on their website */
+@primaryColor: rgb(62, 106, 225);
+
+/* The page background is chosen to blend into the TM3 browser's background to
+create the illusion that the content is part of the system */
+@pageBackground: #fafafa;
+
+/* Set all font families to the native Tesla's 'Gotham' fonts */
+@importGoogleFonts: false;
+@fontName: 'Gotham Medium';
+@headerFont: @fontName, sans-serif;
+@pageFont: @fontName, sans-serif;
+
+/* In the car, the normal baseline 14px font size is very small so we'll
+bump that up a little to be roughly equal to the baseline font size used
+for on screen controls in the TM3 */
+@emSize: 20px;
+@fontSize: 20px;

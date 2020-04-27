@@ -1,0 +1,8 @@
+/*******************************
+         Site Overrides
+*******************************/
+
+/* Buttons are always all caps in the TM3 UI */
+.ui.button {
+  font-variant: all-small-caps;
+}

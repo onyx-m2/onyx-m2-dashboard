@@ -1,0 +1,30 @@
+/* The signal browser occupied all the screen space, and creates a 1x3 css
+   grid to display the data. */
+.SignalBrowser {
+  width: 100%;
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 20px;
+}
+
+.SignalBrowser * {
+  text-transform: uppercase !important;
+}
+
+/* The columns in the grid will scroll independently of each other.
+   The margins aren't needed on any of the columns, the app's padding
+   will "push" them in correctly. */
+.SignalBrowser > * {
+  overflow-y: scroll;
+  will-change: scroll-position;
+  margin: 0 !important;
+
+  border-radius: 10px !important;
+  border: none !important;
+  box-shadow: 0 2px 4px 0 rgba(34,36,38,.12), 0 2px 10px 0 rgba(34,36,38,.15) !important;
+}
+
+.SignalBrowser > .ui.segment {
+  padding: 0;
+}

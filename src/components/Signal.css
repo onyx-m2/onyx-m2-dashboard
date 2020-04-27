@@ -1,0 +1,21 @@
+.Signal {
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: 2fr 1fr;
+  column-gap: 10px;
+  margin: 20px;
+}
+
+.Signal .data {
+  text-align: right;
+  margin-top: 6px;
+}
+
+.Signal .value {
+  font-size: 2em;
+}
+
+.Signal .units {
+  color: #767676;
+  font-size: 0.8em;
+}

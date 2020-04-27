@@ -1,0 +1,8 @@
+/*******************************
+         Site Overrides
+*******************************/
+
+/* Adjustment to tiny headers to actually make them tiny */
+.ui.tiny.header {
+  font-size: 0.6em;
+}
