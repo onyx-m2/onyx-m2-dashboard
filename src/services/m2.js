@@ -30,7 +30,7 @@ export default class M2 {
     }
     const pin = '3485'//Cookies.get('pin')
     const m2host = 'onyx-m2.net'//Cookies.get('m2host')
-    ws = new WebSocket(`ws://${m2host}/m2?pin=${pin}`)
+    ws = new WebSocket(`wss://${m2host}/m2?pin=${pin}`)
     ws.binaryType = 'arraybuffer'
     ws.addEventListener('open', () => {
       wsConnected = true
