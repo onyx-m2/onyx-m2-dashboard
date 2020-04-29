@@ -5,19 +5,47 @@ import SignalBrowser from './components/SignalBrowser'
 import { Button } from 'semantic-ui-react'
 import M2 from './services/m2'
 
+import { SemanticToastContainer, toast } from 'react-semantic-toasts';
+import 'react-semantic-toasts/styles/react-semantic-alert.css';
+
 export default function App() {
   const theme = ''//useContext(ThemeContext)
 
-  // function useM2Effect(event, handler) {
-//   useEffect(() => {
-//     M2.addEventListener(event, handler)
-//     return () => M2.removeEventListener(event, handler)
-//   })
-// }
 
+  // Connection effect
   useEffect(() => {
+    const handle = () => toast({
+      icon: 'car',
+      color: 'olive',
+      title: 'Connected',
+      size: 'tiny',
+      description: 'Onyx M2 is online',
+    })
+    M2.addEventListener('connect', handle)
     M2.connect()
-  }) /// <<< TODO: move to App
+    return () => M2.removeEventListener('connect', handle)
+  })
+
+  // Disconnection effect
+  useEffect(() => {
+    const handle = (event) => {
+      let icon = 'car'
+      let entity = ''
+      if (event.reason == 'network') {
+        icon = 'signal'
+        entity = 'Dashboard'
+      }
+      toast({
+        icon,
+        color: 'orange',
+        title: 'Disconnected',
+        size: 'tiny',
+        description: `Onyx M2 ${entity} is offline`,
+      })
+    }
+    M2.addEventListener('disconnect', handle)
+    return () => M2.removeEventListener('disconnect', handle)
+  })
 
   return (
     <BrowserRouter>
@@ -31,6 +59,7 @@ export default function App() {
           </Route>
         </Switch>
       </div>
+      <SemanticToastContainer position='bottom-right' animation='fade left' />
     </BrowserRouter>
   )
 }
