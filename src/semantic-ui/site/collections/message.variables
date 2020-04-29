@@ -1,3 +1,8 @@
 /*******************************
     User Variable Overrides
 *******************************/
+
+/* Make messages look more like the car's native ones, that is be round and no close
+button */
+@borderRadius: 100px;
+@closeOpacity: 0;
