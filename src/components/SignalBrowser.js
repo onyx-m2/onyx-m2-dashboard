@@ -1,107 +1,81 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { Menu, Segment, Header } from 'semantic-ui-react'
 import './SignalBrowser.css'
 import Signal from './Signal'
 import DBC from '../services/dbc'
-import M2 from '../services/m2'
-import { Link, withRouter } from 'react-router-dom'
-import memoizeOne from 'memoize-one'
+import { Link, useParams, useHistory } from 'react-router-dom'
 
-class Category extends Component {
-  render() {
-    const { url, category, selected } = this.props
-    const { path, name } = category
-    return (
-      <Menu.Item as={Link} to={`${url}/${path}`} active={selected} className='Category'>
-        <Header size='tiny' as='h4' color='grey' content={path} />
-        {name}
-      </Menu.Item>
-    )
-  }
+// Category Component, a canbus category display
+// Props:
+//   - url: the base url of the signal browser
+//   - category: a category object from the dbc
+//   - selected: a boolean indicating if the category is currently selected
+function Category(props) {
+  const { category, selected } = props
+  const { path, name } = category
+  return (
+    <Menu.Item as={Link} to={`../${path}`} active={selected} className='Category'>
+      <Header size='tiny' as='h4' color='grey' content={path} />
+      {name}
+    </Menu.Item>
+  )
 }
 
-class Message extends Component {
-  render() {
-    const { url, message, selected } = this.props
-    const { id, name, category, path } = message
-    return (
-      <Menu.Item as={Link} to={`${url}/${category}/${path}`} active={selected} className='Message'>
-        <Header as='h5' size='tiny' color='grey' content={id} />
-        {name}
-      </Menu.Item>
-    )
-  }
+// Message Component, a canbus message display
+// Props:
+//   - url: the base url of the signal browser
+//   - message: a message object from the dbc
+//   - selected: a boolean indicating if the message is currently selected
+function Message(props) {
+  const { message, selected } = props
+  const { id, name, path } = message
+  return (
+    <Menu.Item as={Link} to={`${path}`} active={selected} className='Message'>
+      <Header as='h5' size='tiny' color='grey' content={id} />
+      {name}
+    </Menu.Item>
+  )
 }
 
-class SignalBrowser extends Component {
+export default function SignalBrowser(props) {
 
-  constructor(props) {
-    super(props)
-    this.state = {}
-    this.handleConnect = this.handleConnect.bind(this)
-    this.handleDisconnect = this.handleDisconnect.bind(this)
+  const history = useHistory()
+  const { categoryPath, messagePath } = useParams()
+  let category = DBC.getCategory(categoryPath)
+  let message = DBC.getMessageFromPath(categoryPath, messagePath)
+  let redirect = false
+  if (!category) {
+    category = DBC.getFirstCategory()
+    redirect = true
+  }
+  if (!message) {
+    message = DBC.getFirstCategoryMessage(category.path)
+    redirect = true
+  }
+  if (redirect) {
+    history.replace(`${props.basePath}/${category.path}/${message.path}`)
   }
 
-
-  componentDidMount() {
-    M2.addEventListener('connect', this.handleConnect)
-    M2.addEventListener('disconnect', this.handleDisconnect)
-    M2.connect()
-  }
-
-  componentWillUnmount() {
-    M2.removeEventListener('connect', this.handleConnect)
-    M2.removeEventListener('disconnect', this.handleDisconnect)
-  }
-
-  handleConnect() {
-  }
-
-  handleDisconnect() {
-  }
-
-  calculateState = memoizeOne((categoryPath, messagePath) => {
-    let category = DBC.getCategory(categoryPath)
-    if (!category) {
-      category = DBC.getFirstCategory()
-    }
-    let messages = DBC.getCategoryMessages(categoryPath)
-    let message = DBC.getMessageFromPath(categoryPath, messagePath)
-    if (!message) {
-      message = DBC.getFirstCategoryMessage(categoryPath)
-    }
-    let signals = DBC.getMessageSignals(message)
-    return { category, messages, message, signals }
-  })
-
-  render() {
-    let { match } = this.props
-    let { path, params } = match
-    let { categoryPath, messagePath } = params
-    const url = path.substring(0, path.indexOf(':') - 1)     // url is a base url, without the optional params
-
-    const categories = DBC.getCategories()
-    const { category, messages, message, signals } = this.calculateState(categoryPath, messagePath)
-    return (
-      <div className='SignalBrowser'>
-        <Menu fluid vertical>
-          {categories.map(c => (
-            <Category key={c.path} url={url} category={c} selected={c.path === category.path} />
-          ))}
-        </Menu>
-        <Menu fluid vertical>
-          {messages.map(m => (
-            <Message key={m.id} url={url} message={m} selected={m.path === message.path} />
-          ))}
-        </Menu>
-        <Segment>
-          {signals.map(s => (
-            <Signal key={s.mnemonic} signal={s.mnemonic} />
-          ))}
-        </Segment>
-      </div>
-    )
-  }
+  const categories = DBC.getCategories()
+  let messages = DBC.getCategoryMessages(categoryPath)
+  let signals = DBC.getMessageSignals(message)
+  return (
+    <div className='SignalBrowser'>
+      <Menu fluid vertical>
+        {categories.map(c => (
+          <Category key={c.path} category={c} selected={c.path === category.path} />
+        ))}
+      </Menu>
+      <Menu fluid vertical>
+        {messages.map(m => (
+          <Message key={m.id} message={m} selected={m.path === message.path} />
+        ))}
+      </Menu>
+      <Segment>
+        {signals.map(s => (
+          <Signal key={s.mnemonic} mnemonic={s.mnemonic} />
+        ))}
+      </Segment>
+    </div>
+  )
 }
-
-export default withRouter(SignalBrowser)

@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie'
 import { BitView } from 'bit-buffer'
 import DBC from './dbc'
 
@@ -9,11 +8,10 @@ const CMDID_SET_ALL_MSG_FLAGS = 0x01
 const CMDID_SET_MSG_FLAGS = 0x02
 const CMDID_GET_MSG_LAST_VALUE = 0x03
 
-var ws
-var wsConnected
-var m2Connected
+var ws = null
+var wsConnected = false
+var m2Connected = false
 var m2EventTarget = new EventTarget()
-
 var signalListeners = []
 var signalEnabledMessageRefs = {} // a map of how many signals require a given message
 
@@ -145,7 +143,8 @@ function releaseSignalMessageRef(signal) {
 function dispatchSignalEvent(signal) {
   const listeners = signalListeners[signal.mnemonic]
   if (listeners) {
-    listeners.forEach(l => l(signal))
+    const { value } = signal
+    listeners.forEach(l => l(value))
   }
 }
 
