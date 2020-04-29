@@ -4,3 +4,4 @@
 
 /* Remove the border to make it look more like the car's UI */
 @border: none;
+@invertedBackground: #000;

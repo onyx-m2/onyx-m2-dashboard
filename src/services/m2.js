@@ -39,7 +39,6 @@ export default class M2 {
         m2Connected = false
         m2EventTarget.dispatchEvent(new DisconnectEvent('network'))
       }
-      setTimeout(() => this.connect(), 1000)
     })
     ws.addEventListener('message', (event) => {
       if (typeof(event.data) === 'string') {

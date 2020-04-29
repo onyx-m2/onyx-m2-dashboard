@@ -5,7 +5,7 @@ import 'react-semantic-toasts/styles/react-semantic-alert.css';
 import { useSwipeable } from 'react-swipeable'
 import './App.css'
 import SignalBrowser from './components/SignalBrowser'
-import { Button, Sidebar, Segment, Menu, Icon } from 'semantic-ui-react'
+import { Button, Sidebar, Menu, Icon } from 'semantic-ui-react'
 import M2 from './services/m2'
 
 
@@ -24,7 +24,7 @@ export default function App() {
     M2.addEventListener('connect', handle)
     M2.connect()
     return () => M2.removeEventListener('connect', handle)
-  })
+  }, [])
 
   // Disconnection effect
   useEffect(() => {
@@ -34,6 +34,7 @@ export default function App() {
       if (event.reason === 'network') {
         icon = 'signal'
         entity = 'Dashboard'
+        setTimeout(() => M2.connect, 1000)
       }
       toast({
         type: 'warning',
@@ -45,13 +46,7 @@ export default function App() {
     }
     M2.addEventListener('disconnect', handle)
     return () => M2.removeEventListener('disconnect', handle)
-  })
-
-  function handleClick(event) {
-    if (event.target === event.currentTarget) {
-      setNavVisible(!navVisible)
-    }
-  }
+  }, [])
 
   // let [ swiping, setSwiping ] = useState({tracking: false, position: 0})
   // const swipers = useSwipeable({
@@ -84,6 +79,7 @@ export default function App() {
         <Sidebar.Pushable>
           <Sidebar
             as={Menu}
+            borderless
             animation='uncover'
             direction='left'
             icon='labeled'
@@ -91,6 +87,7 @@ export default function App() {
             vertical
             visible={navVisible}
             width='thin'
+            onClick={() => setNavVisible(!navVisible)}
           >
             <Menu.Item as={Link} to='/'>
               <Icon name='home' />
@@ -106,7 +103,7 @@ export default function App() {
             </Menu.Item>
           </Sidebar>
           <Sidebar.Pusher>
-            <div className={`App ${theme}`} onClick={handleClick} {...swipers}>
+            <div className={`App ${theme}`} {...swipers}>
               <Switch>
                 <Route exact path='/signals/:categoryPath?/:messagePath?'>
                   <SignalBrowser basePath='/signals' />
