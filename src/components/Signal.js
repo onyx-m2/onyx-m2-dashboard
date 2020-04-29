@@ -1,37 +1,63 @@
 import React, { Component } from 'react'
-import { Item, Statistic } from 'semantic-ui-react'
 import './Signal.css'
+import M2 from '../services/m2'
+import DBC from '../services/dbc'
 
 class Signal extends Component {
 
-  displayUnits(signal) {
-    if (signal.values) {
-      const definedValue = signal.values[signal.value]
-      if (definedValue) {
-        return definedValue.replace(/_/g, ' ')
-      }
-    }
-    return signal.units
-  }
-
-  render() {
-    const { signal } = this.props
-    let { name, value } = signal
+  constructor(props) {
+    super(props)
+    this.signal = DBC.getSignal(props.signal)
+    let { value } = this.signal
     if (value === null || value === undefined) {
       value = '--'
     }
-    const units = this.displayUnits(signal)
+    this.state = { value }
+    this.units = displayUnits(this.signal)
+    this.handleChange = this.handleChange.bind(this)
+  }
+
+  componentDidMount() {
+    M2.addSignalListener(this.signal, this.handleChange)
+  }
+
+  componentWillUnmount() {
+    M2.removeSignalListener(this.signal, this.handleChange)
+  }
+
+  handleChange(signal) {
+    //console.log(`Signal.handleChange: ${signal.name} ${signal.value}`)
+    if (signal.value !== this.state.value) {
+      this.setState({
+        value: signal.value
+      })
+    }
+  }
+
+  render() {
+    const { name } = this.signal
+    const { value } = this.state
+    //console.log(`Signal.render: ${name} ${value}`)
     return (
       <div className='Signal'>
         <div>{name}</div>
         <div className='data'>
           <div className='value'>{value}</div>
-          <div className='units'>{units}</div>
+          <div className='units'>{this.units}</div>
         </div>
-        {/* <Statistic size='small' label={this.displayUnits(signal)} value={value} /> */}
       </div>
     )
   }
+}
+
+function displayUnits(signal) {
+  if (signal.values) {
+    const definedValue = signal.values[signal.value]
+    if (definedValue) {
+      return definedValue.replace(/_/g, ' ')
+    }
+  }
+  return signal.units
 }
 
 export default Signal

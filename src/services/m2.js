@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie'
 import { BitView } from 'bit-buffer'
-import dbc from './dbc'
+import DBC from './dbc'
 
 const CAN_MSG_FLAG_RESET = 0x00
 const CAN_MSG_FLAG_TRANSMIT = 0x01
@@ -14,6 +14,9 @@ var wsConnected
 var m2Connected
 var m2EventTarget = new EventTarget()
 
+var signalListeners = []
+var signalEnabledMessageRefs = {} // a map of how many signals require a given message
+
 export default class M2 {
 
   static addEventListener(event, listener) {
@@ -25,12 +28,9 @@ export default class M2 {
   }
 
   static connect() {
-    if (ws) {
-      return
-    }
-    const pin = '3485'//Cookies.get('pin')
-    const m2host = 'onyx-m2.net'//Cookies.get('m2host')
-    ws = new WebSocket(`wss://${m2host}/m2?pin=${pin}`)
+    const pin = process.env.REACT_APP_M2_PIN
+    const url = process.env.REACT_APP_M2_URL
+    ws = new WebSocket(`${url}?pin=${pin}`)
     ws.binaryType = 'arraybuffer'
     ws.addEventListener('open', () => {
       wsConnected = true
@@ -49,6 +49,7 @@ export default class M2 {
         if (msg === 'm2:connect') {
           m2Connected = true
           m2EventTarget.dispatchEvent(new ConnectEvent())
+          this.enableMessages(Object.keys(signalEnabledMessageRefs).map(x => DBC.getMessage(x)))
         }
         else if (msg === "m2:disconnect") {
           m2Connected = false
@@ -67,13 +68,10 @@ export default class M2 {
     })
   }
 
-  static getMessageValue(messageOrId) {
+  static requestMessageValue(message) {
     if (wsConnected) {
       const size = 2
-      var id = messageOrId
-      if (typeof(messageOrId) === 'object') {
-        id = messageOrId.id
-      }
+      const { id } = message
       ws.send(Uint8Array.from([CMDID_GET_MSG_LAST_VALUE, size, id & 0xff, id >> 8]))
     }
   }
@@ -86,15 +84,13 @@ export default class M2 {
     setAllMessageFlags(CAN_MSG_FLAG_RESET)
   }
 
-  static enableMessage(messageOrMnemonic) {
-    let message = messageOrMnemonic
-    if (typeof(message) === 'string') {
-      message = dbc.getMessage(message)
-    }
-    if (message) {
-      this.getMessageValue(message.id)
-      setMessageFlags(message.id, CAN_MSG_FLAG_TRANSMIT)
-    }
+  static enableMessage(message) {
+    this.requestMessageValue(message)
+    setMessageFlags(message.id, CAN_MSG_FLAG_TRANSMIT)
+  }
+
+  static disableMessage(message) {
+    setMessageFlags(message.id, CAN_MSG_FLAG_RESET)
   }
 
   static enableMessages(messages) {
@@ -104,7 +100,52 @@ export default class M2 {
 
   static enableSignals(signals) {
     signals = [...new Set(signals)]
-    this.enableMessages(signals.map(s => s.message.mnemonic))
+    this.enableMessages(signals.map(s => s.message))
+  }
+
+  static addSignalListener(signal, listener) {
+    let listeners = signalListeners[signal.mnemonic]
+    if (!listeners) {
+      listeners = signalListeners[signal.mnemonic] = []
+    }
+    listeners.push(listener)
+    addSignalMessageRef(signal)
+  }
+
+  static removeSignalListener(signal, listener) {
+    const listeners = signalListeners[signal.mnemonic]
+    if (listeners) {
+      const index = listeners.indexOf(listener)
+      if (index !== -1) {
+        listeners.splice(index, 1)
+      }
+      releaseSignalMessageRef(signal)
+    }
+  }
+}
+
+function addSignalMessageRef(signal) {
+  let refs = signalEnabledMessageRefs[signal.message.mnemonic] || 0
+  if (refs === 0) {
+    M2.enableMessage(signal.message)
+  }
+  signalEnabledMessageRefs[signal.message.mnemonic] = refs + 1
+}
+
+function releaseSignalMessageRef(signal) {
+  let refs = signalEnabledMessageRefs[signal.message.mnemonic] || 0
+  if (refs > 0) {
+    if (refs === 1) {
+      M2.disableMessage(signal.message)
+    }
+    signalEnabledMessageRefs[signal.message.mnemonic] = refs - 1
+  }
+}
+
+function dispatchSignalEvent(signal) {
+  const listeners = signalListeners[signal.mnemonic]
+  if (listeners) {
+    listeners.forEach(l => l(signal))
   }
 }
 
@@ -114,7 +155,7 @@ function processMessage(msg) {
   const len = msg[6]
   const data = msg.slice(7, 7 + len)
 
-  const message = dbc.getMessageFromId(id)
+  const message = DBC.getMessageFromId(id)
   if (message) {
     message.ts = ts
     message.value = data
@@ -135,7 +176,7 @@ function processMessage(msg) {
     }
   }
   else {
-    dbc.addMessage({
+    DBC.addMessage({
       id,
       mnemonic: `UNK_id${id}`,
       category: 'unk',
@@ -155,6 +196,7 @@ function processSignals(buf, signals) {
       value = buf.getBits(s.start, s.length, s.signed)
       value = s.offset + s.scale * value
       s.value = Math.round(value * 100) / 100
+      dispatchSignalEvent(s)
     } catch {
       s.value = 'ERR'
     }

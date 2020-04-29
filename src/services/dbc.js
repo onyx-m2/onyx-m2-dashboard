@@ -24,7 +24,7 @@ function indexMessage(message) {
     indexes.signalMnemonics[message.multiplexor.mnemonic] = message.multiplexor
   }
   if (message.multiplexed) {
-    Object.values(message.multiplexed).forEach(s => {
+    Object.values(message.multiplexed).flat().forEach(s => {
       s.message = message
       indexes.signalMnemonics[s.mnemonic] = s
     })
@@ -79,7 +79,6 @@ class DBC {
   }
 
   static getMessageSignals(message) {
-    console.log('getMessageSignals')
     var signals = []
     if (message) {
       if (message.multiplexor) {
