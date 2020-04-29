@@ -9,4 +9,10 @@ the top browser controls and the sides of the browser window  */
   width: 100vw;
   padding: 10px 20px 20px 20px;
   display: flex;
+  background-color: #fafafa;
 }
+
+/* .App.tracking {
+  transform: translate3d(0, 0, 0);
+  transition: unset;
+} */

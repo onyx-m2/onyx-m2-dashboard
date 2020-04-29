@@ -40,6 +40,6 @@ function useSignalEffect(signal, initialValue) {
     const handleChange = (newValue) => setValue(newValue)
     M2.addSignalListener(signal, handleChange)
     return () => M2.removeSignalListener(signal, handleChange)
-  }, [false])
+  }, [signal])
   return value
 }

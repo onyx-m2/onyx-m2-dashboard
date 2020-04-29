@@ -1,16 +1,16 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter, Switch, Route, Link } from 'react-router-dom'
 import { SemanticToastContainer as ToastContainer, toast } from 'react-semantic-toasts';
 import 'react-semantic-toasts/styles/react-semantic-alert.css';
+import { useSwipeable } from 'react-swipeable'
 import './App.css'
 import SignalBrowser from './components/SignalBrowser'
-import { Button } from 'semantic-ui-react'
+import { Button, Sidebar, Segment, Menu, Icon } from 'semantic-ui-react'
 import M2 from './services/m2'
 
 
 export default function App() {
   const theme = ''//useContext(ThemeContext)
-
 
   // Connection effect
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function App() {
     const handle = (event) => {
       let icon = 'car'
       let entity = ''
-      if (event.reason == 'network') {
+      if (event.reason === 'network') {
         icon = 'signal'
         entity = 'Dashboard'
       }
@@ -47,17 +47,77 @@ export default function App() {
     return () => M2.removeEventListener('disconnect', handle)
   })
 
+  function handleClick(event) {
+    if (event.target === event.currentTarget) {
+      setNavVisible(!navVisible)
+    }
+  }
+
+  // let [ swiping, setSwiping ] = useState({tracking: false, position: 0})
+  // const swipers = useSwipeable({
+  //   onSwiping: () => {
+
+  //   }
+  //   onSwipedLeft: () => {
+  //     setSwiping({tracking: false})
+  //     setNavVisible(false)
+  //   }
+  //   onSwipedRight: () => {
+  //     setSwiping({tracking: false})
+  //     setNavVisible(true)
+  //   },
+  //   preventDefaultTouchmoveEvent: true,
+  //   trackMouse: true
+  // });
+
+  const swipers = useSwipeable({
+    onSwipedLeft: () => setNavVisible(false),
+    onSwipedRight: () => setNavVisible(true),
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: true
+  });
+
+  let [ navVisible, setNavVisible ] = useState(false)
   return (
     <BrowserRouter>
-      <div className={`App ${theme}`}>
-        <Switch>
-          <Route exact path='/signals/:categoryPath?/:messagePath?'>
-            <SignalBrowser basePath='/signals' />
-          </Route>
-          <Route exact path='/'>
-            <Home />
-          </Route>
-        </Switch>
+      <div>
+        <Sidebar.Pushable>
+          <Sidebar
+            as={Menu}
+            animation='uncover'
+            direction='left'
+            icon='labeled'
+            inverted
+            vertical
+            visible={navVisible}
+            width='thin'
+          >
+            <Menu.Item as={Link} to='/'>
+              <Icon name='home' />
+              Home
+            </Menu.Item>
+            <Menu.Item as={Link} to='/signals'>
+              <Icon name='random' />
+              Signals
+            </Menu.Item>
+            <Menu.Item as='a'>
+              <Icon name='camera' />
+              Channels
+            </Menu.Item>
+          </Sidebar>
+          <Sidebar.Pusher>
+            <div className={`App ${theme}`} onClick={handleClick} {...swipers}>
+              <Switch>
+                <Route exact path='/signals/:categoryPath?/:messagePath?'>
+                  <SignalBrowser basePath='/signals' />
+                </Route>
+                <Route exact path='/'>
+                  <Home />
+                </Route>
+              </Switch>
+            </div>
+          </Sidebar.Pusher>
+        </Sidebar.Pushable>
       </div>
       <ToastContainer position='bottom-right' animation='fade left' />
     </BrowserRouter>
