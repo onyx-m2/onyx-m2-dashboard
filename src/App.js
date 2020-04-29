@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react'
 import { BrowserRouter, Switch, Route, Link } from 'react-router-dom'
+import { SemanticToastContainer as ToastContainer, toast } from 'react-semantic-toasts';
+import 'react-semantic-toasts/styles/react-semantic-alert.css';
 import './App.css'
 import SignalBrowser from './components/SignalBrowser'
 import { Button } from 'semantic-ui-react'
 import M2 from './services/m2'
 
-import { SemanticToastContainer, toast } from 'react-semantic-toasts';
-import 'react-semantic-toasts/styles/react-semantic-alert.css';
 
 export default function App() {
   const theme = ''//useContext(ThemeContext)
@@ -15,8 +15,8 @@ export default function App() {
   // Connection effect
   useEffect(() => {
     const handle = () => toast({
+      type: 'success',
       icon: 'car',
-      color: 'olive',
       title: 'Connected',
       size: 'tiny',
       description: 'Onyx M2 is online',
@@ -36,8 +36,8 @@ export default function App() {
         entity = 'Dashboard'
       }
       toast({
+        type: 'warning',
         icon,
-        color: 'orange',
         title: 'Disconnected',
         size: 'tiny',
         description: `Onyx M2 ${entity} is offline`,
@@ -59,7 +59,7 @@ export default function App() {
           </Route>
         </Switch>
       </div>
-      <SemanticToastContainer position='bottom-right' animation='fade left' />
+      <ToastContainer position='bottom-right' animation='fade left' />
     </BrowserRouter>
   )
 }

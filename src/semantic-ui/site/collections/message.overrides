@@ -1,3 +1,30 @@
 /*******************************
         Site Overrides
 *******************************/
+
+/* Make the toasts look more line car's native ones by making them more opaque and
+having inverted text */
+.ui.success.message .header,
+.ui.warning.message .header {
+  color: @invertedSelectedTextColor;
+}
+
+.ui.success.message {
+  background-color: @oliveTextColor;
+  color: @invertedTextColor;
+}
+
+.ui.success.message,
+.ui.attached.success.message {
+  box-shadow: @oliveBoxShadow;
+}
+
+.ui.warning.message {
+  background-color: @orangeTextColor;
+  color: @invertedTextColor;
+}
+
+.ui.warning.message,
+.ui.attached.success.message {
+  box-shadow: @orangeBoxShadow;
+}
