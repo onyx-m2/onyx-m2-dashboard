@@ -259,8 +259,8 @@ function handleWebSocketMessage(event) {
 
 function setDisconnectedState() {
   wsConnecting = false
-  wsConnected = false
   if (m2Connected) {
+    wsConnected = false
     m2Connected = false
     m2EventTarget.dispatchEvent(new DisconnectEvent('network'))
   }
