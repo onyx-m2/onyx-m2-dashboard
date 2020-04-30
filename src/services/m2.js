@@ -9,7 +9,9 @@ const CMDID_SET_MSG_FLAGS = 0x02
 const CMDID_GET_MSG_LAST_VALUE = 0x03
 
 var ws = null
+var wsConnecting = false
 var wsConnected = false
+var wsAlive = false
 var m2Connected = false
 var m2EventTarget = new EventTarget()
 var signalListeners = []
@@ -28,41 +30,18 @@ export default class M2 {
   static connect() {
     const pin = process.env.REACT_APP_M2_PIN
     const url = process.env.REACT_APP_M2_URL
+    wsConnecting = true
     ws = new WebSocket(`${url}?pin=${pin}`)
     ws.binaryType = 'arraybuffer'
-    ws.addEventListener('open', () => {
-      wsConnected = true
-    })
-    ws.addEventListener('close', (event) => {
-      wsConnected = false
-      if (m2Connected) {
-        m2Connected = false
-        m2EventTarget.dispatchEvent(new DisconnectEvent('network'))
-      }
-    })
-    ws.addEventListener('message', (event) => {
-      if (typeof(event.data) === 'string') {
-        const msg = event.data
-        if (msg === 'm2:connect') {
-          m2Connected = true
-          m2EventTarget.dispatchEvent(new ConnectEvent())
-          this.enableMessages(Object.keys(signalEnabledMessageRefs).map(x => DBC.getMessage(x)))
-        }
-        else if (msg === "m2:disconnect") {
-          m2Connected = false
-          m2EventTarget.dispatchEvent(new DisconnectEvent('device'))
-        }
-      }
-      else {
-        const eventData = new Uint8Array(event.data)
-        if (eventData.length >= 7) {
-          const message = processMessage(eventData)
-          if (message) {
-            m2EventTarget.dispatchEvent(new MessageEvent(message))
-          }
-        }
-      }
-    })
+    ws.onopen = handleWebSocketOpen
+    ws.onerror = handleWebSocketError
+    ws.onclose = handleWebSocketClose
+    ws.onmessage = handleWebSocketMessage
+  }
+
+  static disconnect() {
+    setDisconnectedState()
+    ws.close()
   }
 
   static requestMessageValue(message) {
@@ -234,3 +213,70 @@ class DisconnectEvent extends Event {
     this.reason = reason
   }
 }
+
+function handleWebSocketOpen() {
+  wsConnecting = false
+  wsConnected = true
+  wsAlive = true
+}
+
+function handleWebSocketError() {
+  if (wsConnecting) {
+    setTimeout(() => M2.connect(), 1000)
+  }
+}
+
+function handleWebSocketClose() {
+  setDisconnectedState()
+}
+
+function handleWebSocketMessage(event) {
+  if (typeof(event.data) === 'string') {
+    const msg = event.data
+    if (msg === 'pong') {
+      wsAlive = true
+    }
+    else if (msg === 'm2:connect') {
+      m2Connected = true
+      m2EventTarget.dispatchEvent(new ConnectEvent())
+      M2.enableMessages(Object.keys(signalEnabledMessageRefs).map(x => DBC.getMessage(x)))
+    }
+    else if (msg === "m2:disconnect") {
+      m2Connected = false
+      m2EventTarget.dispatchEvent(new DisconnectEvent('device'))
+    }
+  }
+  else {
+    const eventData = new Uint8Array(event.data)
+    if (eventData.length >= 7) {
+      const message = processMessage(eventData)
+      if (message) {
+        m2EventTarget.dispatchEvent(new MessageEvent(message))
+      }
+    }
+  }
+}
+
+function setDisconnectedState() {
+  wsConnecting = false
+  wsConnected = false
+  if (m2Connected) {
+    m2Connected = false
+    m2EventTarget.dispatchEvent(new DisconnectEvent('network'))
+  }
+}
+
+// Continuously monitor an active web socket's state, and disconnect if something
+// is wrong (user level ping/pong mechanism because browser's don't let us implement
+// it at the protocol level)
+setInterval(() => {
+  if (wsConnected) {
+    if (!wsAlive) {
+      M2.disconnect()
+    }
+    else {
+      wsAlive = false
+      ws.send('ping')
+    }
+  }
+}, 2000)
