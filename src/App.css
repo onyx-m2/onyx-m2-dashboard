@@ -12,6 +12,9 @@ the top browser controls and the sides of the browser window  */
   background-color: #fafafa;
 }
 
+* {
+  user-select: none;
+}
 /* .App.tracking {
   transform: translate3d(0, 0, 0);
   transition: unset;
