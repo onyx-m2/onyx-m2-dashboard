@@ -34,7 +34,7 @@ export default function App() {
       if (event.reason === 'network') {
         icon = 'signal'
         entity = 'Dashboard'
-        setTimeout(M2.connect, 1000)
+        setTimeout(() => M2.connect(), 1000)
       }
       toast({
         type: 'warning',
