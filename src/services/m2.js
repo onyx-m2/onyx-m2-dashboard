@@ -12,10 +12,13 @@ var ws = null
 var wsConnecting = false
 var wsConnected = false
 var wsAlive = false
+var wsPingTime = Date.now()
 var m2Connected = false
 var m2EventTarget = new EventTarget()
 var signalListeners = []
 var signalEnabledMessageRefs = {} // a map of how many signals require a given message
+var messagesAt = []
+var wsLatency = 0
 
 export default class M2 {
 
@@ -214,6 +217,14 @@ class DisconnectEvent extends Event {
   }
 }
 
+class StatsEvent extends Event {
+  constructor(rate, latency) {
+    super('stats')
+    this.rate = rate
+    this.latency = latency
+  }
+}
+
 function handleWebSocketOpen() {
   wsConnecting = false
   wsConnected = true
@@ -235,6 +246,7 @@ function handleWebSocketMessage(event) {
     const msg = event.data
     if (msg === 'pong') {
       wsAlive = true
+      wsLatency = Date.now() - wsPingTime
     }
     else if (msg === 'm2:connect') {
       m2Connected = true
@@ -247,6 +259,7 @@ function handleWebSocketMessage(event) {
     }
   }
   else {
+    messagesAt.push(Date.now())
     const eventData = new Uint8Array(event.data)
     if (eventData.length >= 7) {
       const message = processMessage(eventData)
@@ -276,7 +289,16 @@ setInterval(() => {
     }
     else {
       wsAlive = false
+      wsPingTime = Date.now()
       ws.send('ping')
     }
   }
 }, 2000)
+
+setInterval(() => {
+  const now = Date.now()
+  messagesAt = messagesAt.filter(t => now - t <= 1000)
+  const rate = messagesAt.length
+  const latency = wsLatency
+  m2EventTarget.dispatchEvent(new StatsEvent(rate, latency))
+}, 1000)

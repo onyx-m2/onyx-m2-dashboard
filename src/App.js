@@ -48,6 +48,15 @@ export default function App() {
     return () => M2.removeEventListener('disconnect', handle)
   }, [])
 
+  const [ stats, setStats ] = useState({rate: 0, latency: 0})
+  useEffect(() => {
+    const handle = (event) => {
+      setStats(event)
+    }
+    M2.addEventListener('stats', handle)
+    return () => M2.removeEventListener('stats', handle)
+  }, [])
+
   // let [ swiping, setSwiping ] = useState({tracking: false, position: 0})
   // const swipers = useSwipeable({
   //   onSwiping: () => {
@@ -100,6 +109,10 @@ export default function App() {
             <Menu.Item as='a'>
               <Icon name='camera' />
               Channels
+            </Menu.Item>
+            <Menu.Item>
+              <div>{stats.rate} msg/s</div>
+              <div>{stats.latency} ms</div>
             </Menu.Item>
           </Sidebar>
           <Sidebar.Pusher>
