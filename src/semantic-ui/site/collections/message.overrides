@@ -28,3 +28,9 @@ having inverted text */
 .ui.attached.success.message {
   box-shadow: @orangeBoxShadow;
 }
+
+/* No idea why Semantic would set width to 100% when there's an icon in the message,
+making the 'compact' style not possible */
+.ui.icon.message {
+  width: unset;
+}

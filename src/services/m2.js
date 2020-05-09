@@ -1,304 +1,106 @@
-import { BitView } from 'bit-buffer'
-import DBC from './dbc'
+import React, { createContext, useEffect, useContext, useState } from 'react'
 
-const CAN_MSG_FLAG_RESET = 0x00
-const CAN_MSG_FLAG_TRANSMIT = 0x01
+const M2 = createContext()
+export default M2
 
-const CMDID_SET_ALL_MSG_FLAGS = 0x01
-const CMDID_SET_MSG_FLAGS = 0x02
-const CMDID_GET_MSG_LAST_VALUE = 0x03
+export function M2Provider(props) {
+  const { ws, dbc, children } = props
+  const listeners = new EventTarget()
 
-var ws = null
-var wsConnecting = false
-var wsConnected = false
-var wsAlive = false
-var wsPingTime = Date.now()
-var m2Connected = false
-var m2EventTarget = new EventTarget()
-var signalListeners = []
-var signalEnabledMessageRefs = {} // a map of how many signals require a given message
-var messagesAt = []
-var wsLatency = 0
-
-export default class M2 {
-
-  static addEventListener(event, listener) {
-    m2EventTarget.addEventListener(event, listener)
-  }
-
-  static removeEventListener(event, listener) {
-    m2EventTarget.removeEventListener(event, listener)
-  }
-
-  static connect() {
-    const pin = process.env.REACT_APP_M2_PIN
-    const url = process.env.REACT_APP_M2_URL
-    wsConnecting = true
-    ws = new WebSocket(`${url}?pin=${pin}`)
-    ws.binaryType = 'arraybuffer'
-    ws.onopen = handleWebSocketOpen
-    ws.onerror = handleWebSocketError
-    ws.onclose = handleWebSocketClose
-    ws.onmessage = handleWebSocketMessage
-  }
-
-  static disconnect() {
-    setDisconnectedState()
-    ws.close()
-  }
-
-  static requestMessageValue(message) {
-    if (wsConnected) {
-      const size = 2
-      const { id } = message
-      ws.send(Uint8Array.from([CMDID_GET_MSG_LAST_VALUE, size, id & 0xff, id >> 8]))
-    }
-  }
-
-  static enableAllMessages() {
-    setAllMessageFlags(CAN_MSG_FLAG_TRANSMIT)
-  }
-
-  static disableAllMessages() {
-    setAllMessageFlags(CAN_MSG_FLAG_RESET)
-  }
-
-  static enableMessage(message) {
-    this.requestMessageValue(message)
-    setMessageFlags(message.id, CAN_MSG_FLAG_TRANSMIT)
-  }
-
-  static disableMessage(message) {
-    setMessageFlags(message.id, CAN_MSG_FLAG_RESET)
-  }
-
-  static enableMessages(messages) {
-    const mnemonics = [...new Set(messages)]
-    mnemonics.forEach(m => this.enableMessage(m))
-  }
-
-  static enableSignals(signals) {
-    signals = [...new Set(signals)]
-    this.enableMessages(signals.map(s => s.message))
-  }
-
-  static addSignalListener(signal, listener) {
-    let listeners = signalListeners[signal.mnemonic]
-    if (!listeners) {
-      listeners = signalListeners[signal.mnemonic] = []
-    }
-    listeners.push(listener)
-    addSignalMessageRef(signal)
-  }
-
-  static removeSignalListener(signal, listener) {
-    const listeners = signalListeners[signal.mnemonic]
-    if (listeners) {
-      const index = listeners.indexOf(listener)
-      if (index !== -1) {
-        listeners.splice(index, 1)
+  useEffect(() => {
+    function handleMessage(event) {
+      try {
+        const payload = JSON.parse(event.data)
+        listeners.dispatchEvent(new CustomEvent(payload.event, { detail: payload.data }))
       }
-      releaseSignalMessageRef(signal)
+      catch {
+        throw new Error(`Cannot parse message from M2: ${event.data}`)
+      }
     }
+    ws.addEventListener('message', handleMessage)
+    return () => ws.removeEventListener('message', handleMessage)
+  }, [ws])
+
+  function send(event, data) {
+    ws.send(JSON.stringify({ event, data }))
   }
+
+  return (
+    <M2.Provider value={{ ws, dbc, listeners, send }}>
+      {children}
+    </M2.Provider>
+  )
 }
 
-function addSignalMessageRef(signal) {
-  let refs = signalEnabledMessageRefs[signal.message.mnemonic] || 0
-  if (refs === 0) {
-    M2.enableMessage(signal.message)
-  }
-  signalEnabledMessageRefs[signal.message.mnemonic] = refs + 1
-}
+// Ping pong mechanism to prevent idle disconnects, detect unresponsive web sockets,
+// and calculate latency. Message level ping/pong mechanism is required because
+// browsers don't let us implement it at the protocol level.
+export function usePingPongState(frequency, timeout) {
+  const { ws, send, listeners } = useContext(M2)
+  const [ latency, setLatency ] = useState(0)
+  const [ connected, setConnected ] = useState(false)
 
-function releaseSignalMessageRef(signal) {
-  let refs = signalEnabledMessageRefs[signal.message.mnemonic] || 0
-  if (refs > 0) {
-    if (refs === 1) {
-      M2.disableMessage(signal.message)
-    }
-    signalEnabledMessageRefs[signal.message.mnemonic] = refs - 1
-  }
-}
+  useEffect(() => {
+    let at = 0
 
-function dispatchSignalEvent(signal) {
-  const listeners = signalListeners[signal.mnemonic]
-  if (listeners) {
-    const { value } = signal
-    listeners.forEach(l => l(value))
-  }
-}
-
-function processMessage(msg) {
-  const ts = msg[0] | (msg[1] << 8) | (msg[2] << 16) | (msg[3] << 24)
-  const id = msg[4] | (msg[5] << 8)
-  const len = msg[6]
-  const data = msg.slice(7, 7 + len)
-
-  const message = DBC.getMessageFromId(id)
-  if (message) {
-    message.ts = ts
-    message.value = data
-    const buf = new BitView(data.buffer)
-    if (message.signals) {
-      processSignals(buf, message.signals)
-    }
-    const mp = message.multiplexor
-    if (mp) {
-      const id = message.multiplexor.value = buf.getBits(mp.start, mp.length, mp.signed)
-      const multiplexed = message.multiplexed[id]
-      if (multiplexed) {
-        processSignals(buf, multiplexed)
+    const intervalId = setInterval(() => {
+      const now = Date.now()
+      if (at !== 0) {
+        if (now - at >= timeout) {
+          setConnected(false)
+          at = 0
+          ws.reconnect()
+        }
       }
       else {
-        console.log(`Unknown multiplexed signal for ${message.mnemonic}: ${id}`)
+        at = now
+        send('ping')
       }
-    }
-  }
-  else {
-    DBC.addMessage({
-      id,
-      mnemonic: `UNK_id${id}`,
-      category: 'unk',
-      path: 'id',
-      name: id.toString(),
-      length: len,
-      value: data
-    })
-  }
-  return message
-}
+    }, frequency)
 
-function processSignals(buf, signals) {
-  signals.forEach(s => {
-    var value
-    try {
-      value = buf.getBits(s.start, s.length, s.signed)
-      value = s.offset + s.scale * value
-      s.value = Math.round(value * 100) / 100
-      dispatchSignalEvent(s)
-    } catch {
-      s.value = 'ERR'
-    }
-  })
-}
+    // function handleHello() {
+    //   setConnected(true)
+    //   at = Date.now()
+    //   send('ping')
+    // }
+    // listeners.addEventListener('hello', handleHello)
 
-function setAllMessageFlags(flags) {
-  if (wsConnected) {
-    const size = 1
-    ws.send(Uint8Array.from([CMDID_SET_ALL_MSG_FLAGS, size, flags & 0xff]))
-  }
-}
-
-function setMessageFlags(id, flags) {
-  if (wsConnected) {
-    const size = 3
-    ws.send(Uint8Array.from([CMDID_SET_MSG_FLAGS, size, id & 0xff, id >> 8, flags & 0xff]))
-  }
-}
-
-class ConnectEvent extends Event {
-  constructor() {
-    super('connect')
-  }
-}
-
-class MessageEvent extends Event {
-  constructor(message) {
-    super('message')
-    this.message = message
-  }
-}
-
-class DisconnectEvent extends Event {
-  constructor(reason) {
-    super('disconnect')
-    this.reason = reason
-  }
-}
-
-class StatsEvent extends Event {
-  constructor(rate, latency) {
-    super('stats')
-    this.rate = rate
-    this.latency = latency
-  }
-}
-
-function handleWebSocketOpen() {
-  wsConnecting = false
-  wsConnected = true
-  wsAlive = true
-}
-
-function handleWebSocketError() {
-  if (wsConnecting) {
-    setTimeout(() => M2.connect(), 1000)
-  }
-}
-
-function handleWebSocketClose() {
-  setDisconnectedState()
-}
-
-function handleWebSocketMessage(event) {
-  if (typeof(event.data) === 'string') {
-    const msg = event.data
-    if (msg === 'pong') {
-      wsAlive = true
-      wsLatency = Date.now() - wsPingTime
-    }
-    else if (msg === 'm2:connect') {
-      m2Connected = true
-      m2EventTarget.dispatchEvent(new ConnectEvent())
-      M2.enableMessages(Object.keys(signalEnabledMessageRefs).map(x => DBC.getMessage(x)))
-    }
-    else if (msg === "m2:disconnect") {
-      m2Connected = false
-      m2EventTarget.dispatchEvent(new DisconnectEvent('device'))
-    }
-  }
-  else {
-    messagesAt.push(Date.now())
-    const eventData = new Uint8Array(event.data)
-    if (eventData.length >= 7) {
-      const message = processMessage(eventData)
-      if (message) {
-        m2EventTarget.dispatchEvent(new MessageEvent(message))
+    function handlePong() {
+      if (!connected) {
+        setConnected(true)
       }
+      setLatency(Date.now() - at)
+      at = 0
     }
-  }
+    listeners.addEventListener('pong', handlePong)
+
+    return () => {
+      //listeners.removeEventListener('hello', handleHello)
+      listeners.removeEventListener('pong', handlePong)
+      clearInterval(intervalId)
+    }
+  }, [ws, frequency, timeout])
+
+  return [ connected, latency ]
 }
 
-function setDisconnectedState() {
-  wsConnecting = false
-  if (m2Connected) {
-    wsConnected = false
-    m2Connected = false
-    m2EventTarget.dispatchEvent(new DisconnectEvent('network'))
-  }
+// Status protocol implementation that tracks the M2's online
+// status and latency between itself and the server
+export function useStatusState() {
+  const { ws, listeners } = useContext(M2)
+  const [ online, setOnline ] = useState(false)
+  const [ latency, setLatency ] = useState(0)
+  const [ rate, setRate ] = useState(0)
+
+  useEffect(() => {
+    function handleStatus(e) {
+      setOnline(e.detail.online)
+      setLatency(e.detail.latency)
+      setRate(e.detail.rate)
+    }
+    listeners.addEventListener('status', handleStatus)
+    return () => listeners.removeEventListener('status', handleStatus)
+  }, [ws])
+
+  return [ online, latency, rate ]
 }
-
-// Continuously monitor an active web socket's state, and disconnect if something
-// is wrong (user level ping/pong mechanism because browser's don't let us implement
-// it at the protocol level)
-setInterval(() => {
-  if (wsConnected) {
-    if (!wsAlive) {
-      M2.disconnect()
-    }
-    else {
-      wsAlive = false
-      wsPingTime = Date.now()
-      ws.send('ping')
-    }
-  }
-}, 2000)
-
-setInterval(() => {
-  const now = Date.now()
-  messagesAt = messagesAt.filter(t => now - t <= 1000)
-  const rate = messagesAt.length
-  const latency = wsLatency
-  m2EventTarget.dispatchEvent(new StatsEvent(rate, latency))
-}, 1000)

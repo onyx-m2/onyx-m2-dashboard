@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Menu, Segment, Header } from 'semantic-ui-react'
 import './SignalBrowser.css'
 import Signal from './Signal'
-import DBC from '../services/dbc'
+//import DBC from '../services/dbc-old'
 import { Link, useParams, useHistory } from 'react-router-dom'
+import M2 from '../services/m2'
 
 // Category Component, a canbus category display
 // Props:
@@ -38,27 +39,27 @@ function Message(props) {
 }
 
 export default function SignalBrowser(props) {
-
+  const { dbc } = useContext(M2)
   const history = useHistory()
   const { categoryPath, messagePath } = useParams()
-  let category = DBC.getCategory(categoryPath)
-  let message = DBC.getMessageFromPath(categoryPath, messagePath)
+  let category = dbc.getCategory(categoryPath)
+  let message = dbc.getMessageFromPath(categoryPath, messagePath)
   let redirect = false
   if (!category) {
-    category = DBC.getFirstCategory()
+    category = dbc.getFirstCategory()
     redirect = true
   }
   if (!message) {
-    message = DBC.getFirstCategoryMessage(category.path)
+    message = dbc.getFirstCategoryMessage(category.path)
     redirect = true
   }
   if (redirect) {
     history.replace(`${props.basePath}/${category.path}/${message.path}`)
   }
 
-  const categories = DBC.getCategories()
-  let messages = DBC.getCategoryMessages(categoryPath)
-  let signals = DBC.getMessageSignals(message)
+  const categories = dbc.getCategories()
+  let messages = dbc.getCategoryMessages(categoryPath)
+  let signals = dbc.getMessageSignals(message.mnemonic)
   return (
     <div className='SignalBrowser'>
       <Menu fluid vertical>
