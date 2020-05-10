@@ -12,6 +12,7 @@ import * as serviceWorker from './serviceWorker'
 import { M2Provider } from './services/m2'
 import { SignalProvider } from './services/signal-manager';
 import DBC from './services/dbc'
+import { Loader } from 'semantic-ui-react';
 
 const secure = process.env.REACT_APP_M2_SECURE === 'true'
 const hostname = process.env.REACT_APP_M2_HOSTNAME
@@ -26,7 +27,7 @@ function initWebSocket() {
   return ws
 }
 
-async function initDBC(model) {
+async function loadDBC(model) {
   const scheme = secure ? 'https' : 'http'
   const m2 = axios.create({
     baseURL: `${scheme}://${hostname}`,
@@ -34,16 +35,25 @@ async function initDBC(model) {
       'Authorization': authorization
     }
   })
-  const [categories, definitions] = await Promise.all([
-    m2.get(`/dbc/${model}/categories.json`),
-    m2.get(`/dbc/${model}/definitions.json`)
-  ])
-  return new DBC(categories.data, definitions.data)
+
+  while (true) {
+    try {
+      const [categories, definitions] = await Promise.all([
+        m2.get(`/dbc/${model}/categories.json`),
+        m2.get(`/dbc/${model}/definitions.json`)
+      ])
+      return new DBC(categories.data, definitions.data)
+    }
+    catch {
+      console.warn('Unable to load DBC, retrying in 1 second')
+      await new Promise(r => setTimeout(r, 1000))
+    }
+  }
 }
 
 async function init() {
   const ws = initWebSocket()
-  const dbc = await initDBC('tm3')
+  const dbc = await loadDBC('tm3')
   ReactDOM.render(
     <React.StrictMode>
       <M2Provider ws={ws} dbc={dbc}>
@@ -57,6 +67,10 @@ async function init() {
 }
 
 init()
+ReactDOM.render(
+  <Loader style={{height: '100vh'}} active size='massive'>Loading</Loader>,
+  document.getElementById('root')
+)
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
