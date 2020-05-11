@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { BrowserRouter, Switch, Route, Link, Redirect } from 'react-router-dom'
 import 'react-semantic-toasts/styles/react-semantic-alert.css';
 import { useSwipeable } from 'react-swipeable'
@@ -6,37 +6,33 @@ import './App.css'
 import SignalBrowser from './components/SignalBrowser'
 import { Sidebar, Menu, Icon } from 'semantic-ui-react'
 import { usePingPongState, useStatusState } from './services/m2'
-import ConnectionPopup from './components/ConnectionState';
-import { SemanticToastContainer, toast } from 'react-semantic-toasts';
+import ConnectionPopup from './components/ConnectionPopup';
 
+/**
+ * The App component uses the router to navigate to different panels in the app.
+ * The app itself only provides the sidebar menu, the ability to swipe right to
+ * reveal the sidebar, and connectivity status reporting.
+ */
 export default function App() {
 
-  const [ appConnected, appLatency ] = usePingPongState(1000, 4000)
-  const [ m2Online, m2Latency, m2Rate ] = useStatusState()
+  const [ appIsOnline, appLatency ] = usePingPongState(1000, 4000)
+  const [ m2IsOnline, m2Latency, m2Rate ] = useStatusState()
 
   const swipers = useSwipeable({
-    onSwipedLeft: () => setNavVisible(false),
-    onSwipedRight: () => setNavVisible(true),
+    onSwipedLeft: () => setSidebarVisible(false),
+    onSwipedRight: () => setSidebarVisible(true),
     preventDefaultTouchmoveEvent: true,
     trackMouse: true
   });
 
-  let [ navVisible, setNavVisible ] = useState(false)
-
-  // toast({
-  //   type: 'warning',
-  //   title: 'Disconnected',
-  //   size: 'tiny',
-  //   description: `Onyx is offline`,
-  //   time: 100000
-  // })
+  let [ sidebarVisible, setSidebarVisible ] = useState(false)
 
   return (
     <BrowserRouter>
       <Sidebar.Pushable>
         <Sidebar as={Menu} borderless animation='uncover' direction='left'
           icon='labeled' inverted vertical width='thin'
-          visible={navVisible} onClick={() => setNavVisible(!navVisible)}
+          visible={sidebarVisible} onClick={() => setSidebarVisible(!sidebarVisible)}
         >
           <Menu.Item as={Link} to='/'>
             <Icon name='home' />
@@ -69,9 +65,7 @@ export default function App() {
           </div>
         </Sidebar.Pusher>
       </Sidebar.Pushable>
-      <ConnectionPopup app={appConnected} m2={m2Online} />
-      <SemanticToastContainer>
-      </SemanticToastContainer>
+      <ConnectionPopup app={appIsOnline} m2={m2IsOnline} />
     </BrowserRouter>
   )
 }

@@ -7,8 +7,6 @@ import axios from 'axios'
 import App from './App';
 import * as serviceWorker from './serviceWorker'
 
-// import categories from '../data/categories.json'
-// import definitions from '../data/tesla_model_3_dbc.json'
 import { M2Provider } from './services/m2'
 import { SignalProvider } from './services/signal-manager';
 import DBC from './services/dbc'
@@ -18,6 +16,9 @@ const secure = process.env.REACT_APP_M2_SECURE === 'true'
 const hostname = process.env.REACT_APP_M2_HOSTNAME
 const authorization = process.env.REACT_APP_M2_AUTHORIZATION
 
+/**
+ * Open a forever reconnecting web socket connection to the m2 serve.
+ */
 function initWebSocket() {
   const scheme = secure ? 'wss' : 'ws'
   const ws = new ReconnectingWebSocket(`${scheme}://${hostname}/dashboard?pin=${authorization}`, [], {
@@ -27,6 +28,10 @@ function initWebSocket() {
   return ws
 }
 
+/**
+ * Load the DBC for the specified car model.
+ * @param {String} model Car model, currently only 'tm3' is supported
+ */
 async function loadDBC(model) {
   const scheme = secure ? 'https' : 'http'
   const m2 = axios.create({
@@ -51,6 +56,9 @@ async function loadDBC(model) {
   }
 }
 
+/**
+ * Initialize the application, and render once all the data is loaded.
+ */
 async function init() {
   const ws = initWebSocket()
   const dbc = await loadDBC('tm3')
@@ -66,6 +74,7 @@ async function init() {
   )
 }
 
+// Render a loading screen until the actual initialization is done
 init()
 ReactDOM.render(
   <Loader style={{height: '100vh'}} active size='massive'>Loading</Loader>,

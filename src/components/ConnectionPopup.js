@@ -1,17 +1,19 @@
-import React, { useEffect, useState } from 'react'
-import './ConnectionState.css'
+import React from 'react'
+import PropTypes from 'prop-types'
+import './ConnectionPopup.css'
 import { Message, Icon } from 'semantic-ui-react'
 
-// Signal Component, a realtime canbus signal display
-// Props:
-//   - mnemonic: the mnemonic of the signal to display
+/**
+ * Component that flashes a floating message when there connection issues.
+ * @component
+ */
 export default function ConnectionPopup(props) {
   const { app, m2 } = props
   console.log(`app: ${app}, m2: ${m2}`)
 
   if (!app) {
     return (
-      <Message color='black' icon floating className='ConnectionState'>
+      <Message color='black' icon floating className='ConnectionPopup'>
         <LoadingIcon icon='image' />
         <DisabledIcon icon='car' />
         <Message.Content>
@@ -24,7 +26,7 @@ export default function ConnectionPopup(props) {
 
   if (!m2) {
     return (
-      <Message color='black' icon floating className='ConnectionState'>
+      <Message color='black' icon floating className='ConnectionPopup'>
         <SuccessIcon icon='image' />
         <LoadingIcon icon='car' />
         <Message.Content>
@@ -36,6 +38,18 @@ export default function ConnectionPopup(props) {
   }
 
   return (null)
+}
+
+ConnectionPopup.propTypes = {
+  /**
+   * Indicates whether the app is online (can reach the M2 server)
+   */
+  app: PropTypes.bool.isRequired,
+
+  /**
+   * Indicates whether M2 is online (i.e. the M2 is able to reach the M2 server)
+   */
+  m2: PropTypes.bool.isRequired
 }
 
 function LoadingIcon(props) {

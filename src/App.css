@@ -3,7 +3,7 @@ avoid having to hard code the size. This will also allow us to fit content into
 the screen, as opposed to having the content dictate the size of the app's display.
 
 The padding values give the appearance our content is equidistant from
-the top browser controls and the sides of the browser window  */
+the top browser controls and the sides of the browser window.  */
 .App {
   height: 100vh;
   width: 100vw;
@@ -15,7 +15,3 @@ the top browser controls and the sides of the browser window  */
 * {
   user-select: none;
 }
-/* .App.tracking {
-  transform: translate3d(0, 0, 0);
-  transition: unset;
-} */

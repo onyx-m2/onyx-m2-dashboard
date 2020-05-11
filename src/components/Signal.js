@@ -1,25 +1,16 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext } from 'react'
+import PropTypes from 'prop-types'
 import './Signal.css'
-import {  } from '../services/m2'
 import M2 from '../services/m2'
 import { useSignalState } from '../services/signal-manager'
-//import M2 from '../services/m2-old'
-//import DBC from '../services/dbc'
 
-// Signal Component, a realtime canbus signal display
-// Props:
-//   - mnemonic: the mnemonic of the signal to display
+/**
+ * Component displaying a realtime canbus signal.
+ * @component
+ */
 export default function Signal(props) {
   const decimals = props.decimals || 2
   const { dbc } = useContext(M2)
-  //const signal = DBC.getSignal(props.mnemonic)
-  // const signal = useDbcContext()
-
-  // let initialValue =  signal.value
-  // if (initialValue === null || initialValue === undefined) {
-  //   initialValue = '--'
-  // }
-  // const value = useSignalEffect(signal, initialValue)
 
   const value = useSignalState(props.mnemonic, '--')
   let displayValue = value
@@ -48,12 +39,14 @@ export default function Signal(props) {
   )
 }
 
-// function useSignalEffect(signal, initialValue) {
-//   const [ value, setValue ] = useState(initialValue)
-//   useEffect(() => {
-//     const handleChange = (newValue) => setValue(newValue)
-//     M2.addSignalListener(signal, handleChange)
-//     return () => M2.removeSignalListener(signal, handleChange)
-//   }, [signal])
-//   return value
-// }
+Signal.propTypes = {
+  /**
+   * Number of decimal places to display
+   */
+  decimals: PropTypes.number,
+
+  /**
+   * Mnemonic of the signal to display
+   */
+  mnemonic: PropTypes.string.isRequired
+}

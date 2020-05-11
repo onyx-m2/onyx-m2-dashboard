@@ -3,6 +3,11 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 
 export const SignalContext = createContext()
 
+/**
+ * Context provider that gives access to `subscribe` and `unsubscribe` functions for
+ * hooking into realtime signal value updates.
+ * @param {*} props
+ */
 export function SignalProvider(props) {
   const { children } = props
   const { dbc, send, listeners } = useContext(M2)
@@ -32,10 +37,12 @@ export function SignalProvider(props) {
       }
       if (signalListeners.length === 0) {
         send('unsubscribe', mnemonic)
+        delete allSignalsListeners[mnemonic]
       }
     }
   }
 
+  // handle ingress signals by dispatching them to the listeners
   useEffect(() => {
     function handleSignal(event) {
       const { mnemonic, value } = event.detail
@@ -48,6 +55,18 @@ export function SignalProvider(props) {
     return () => listeners.removeEventListener('signal', handleSignal)
   }, [dbc])
 
+  // handle reconnects by re-subscribing to the signals we require
+  useEffect(() => {
+    function handleHello() {
+      for (let mnemonic in allSignalsListeners) {
+        send('subscribe', mnemonic)
+      }
+    }
+    listeners.addEventListener('hello', handleHello)
+
+    return () => listeners.removeEventListener('hello', handleHello)
+  }, [dbc])
+
   return (
     <SignalContext.Provider value={{ subscribe, unsubscribe }}>
       {children}
@@ -55,6 +74,12 @@ export function SignalProvider(props) {
   )
 }
 
+/**
+ * State hook that provides the realtime value of the specified signal. Requires
+ * `SignalProvider` to be present in the render tree.
+ * @param {String} mnemonic Mnemonic of the signal to subscribe to
+ * @param {*} initialValue Initial value to return while the signal has no value
+ */
 export function useSignalState(mnemonic, initialValue) {
   const { subscribe, unsubscribe } = useContext(SignalContext)
   const [ value, setValue ] = useState(initialValue)
@@ -69,41 +94,3 @@ export function useSignalState(mnemonic, initialValue) {
   }, [mnemonic])
   return value
 }
-
-// function addListener(allListeners, mnemonic) {
-//   let listeners = allListeners[mnemonic]
-//   if (!listeners) {
-//     listeners = allListeners[mnemonic] = []
-//   }
-//   listeners.push(listener)
-//   addSignalMessageRef(signal)
-// }
-
-// function removeSignalListener(signal, listener) {
-//   const listeners = signalListeners[signal.mnemonic]
-//   if (listeners) {
-//     const index = listeners.indexOf(listener)
-//     if (index !== -1) {
-//       listeners.splice(index, 1)
-//     }
-//     releaseSignalMessageRef(signal)
-//   }
-// }
-
-// function addSignalMessageRef(signal) {
-//   let refs = signalEnabledMessageRefs[signal.message.mnemonic] || 0
-//   if (refs === 0) {
-//     M2.enableMessage(signal.message)
-//   }
-//   signalEnabledMessageRefs[signal.message.mnemonic] = refs + 1
-// }
-
-// function releaseSignalMessageRef(signal) {
-//   let refs = signalEnabledMessageRefs[signal.message.mnemonic] || 0
-//   if (refs > 0) {
-//     if (refs === 1) {
-//       M2.disableMessage(signal.message)
-//     }
-//     signalEnabledMessageRefs[signal.message.mnemonic] = refs - 1
-//   }
-// }

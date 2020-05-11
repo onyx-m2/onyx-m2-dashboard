@@ -3,6 +3,11 @@ import React, { createContext, useEffect, useContext, useState } from 'react'
 const M2 = createContext()
 export default M2
 
+/**
+ * Context provider for the M2, which must be present in the render tree above the
+ * App component.
+ * @param {*} props
+ */
 export function M2Provider(props) {
   const { ws, dbc, children } = props
   const listeners = new EventTarget()
@@ -32,9 +37,14 @@ export function M2Provider(props) {
   )
 }
 
-// Ping pong mechanism to prevent idle disconnects, detect unresponsive web sockets,
-// and calculate latency. Message level ping/pong mechanism is required because
-// browsers don't let us implement it at the protocol level.
+/**
+ * Ping pong state hook to prevent idle disconnects, detect unresponsive web sockets,
+ * and calculate latency. A message level ping/pong mechanism is required because
+ * browsers don't let us implement it at the protocol level.
+ * @param {Number} frequency Interval, in milliseconds, at which to ping the server
+ * @param {Number} timeout Amount of time, in milliseconds, to allow server to respond
+ * to ping with a pong
+ */
 export function usePingPongState(frequency, timeout) {
   const { ws, send, listeners } = useContext(M2)
   const [ latency, setLatency ] = useState(0)
@@ -58,13 +68,6 @@ export function usePingPongState(frequency, timeout) {
       }
     }, frequency)
 
-    // function handleHello() {
-    //   setConnected(true)
-    //   at = Date.now()
-    //   send('ping')
-    // }
-    // listeners.addEventListener('hello', handleHello)
-
     function handlePong() {
       if (!connected) {
         setConnected(true)
@@ -75,7 +78,6 @@ export function usePingPongState(frequency, timeout) {
     listeners.addEventListener('pong', handlePong)
 
     return () => {
-      //listeners.removeEventListener('hello', handleHello)
       listeners.removeEventListener('pong', handlePong)
       clearInterval(intervalId)
     }
@@ -84,8 +86,10 @@ export function usePingPongState(frequency, timeout) {
   return [ connected, latency ]
 }
 
-// Status protocol implementation that tracks the M2's online
-// status and latency between itself and the server
+/**
+ * Status protocol implementation that tracks the M2's online status and latency
+ * between itself and the server.
+ */
 export function useStatusState() {
   const { ws, listeners } = useContext(M2)
   const [ online, setOnline ] = useState(false)

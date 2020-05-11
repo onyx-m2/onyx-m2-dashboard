@@ -1,43 +1,17 @@
 import React, { useContext } from 'react'
+import PropTypes from 'prop-types'
 import { Menu, Segment, Header } from 'semantic-ui-react'
 import './SignalBrowser.css'
 import Signal from './Signal'
-//import DBC from '../services/dbc-old'
 import { Link, useParams, useHistory } from 'react-router-dom'
 import M2 from '../services/m2'
 
-// Category Component, a canbus category display
-// Props:
-//   - url: the base url of the signal browser
-//   - category: a category object from the dbc
-//   - selected: a boolean indicating if the category is currently selected
-function Category(props) {
-  const { category, selected } = props
-  const { path, name } = category
-  return (
-    <Menu.Item as={Link} to={`../${path}`} active={selected} className='Category'>
-      <Header size='tiny' as='h4' color='grey' content={path} />
-      {name}
-    </Menu.Item>
-  )
-}
-
-// Message Component, a canbus message display
-// Props:
-//   - url: the base url of the signal browser
-//   - message: a message object from the dbc
-//   - selected: a boolean indicating if the message is currently selected
-function Message(props) {
-  const { message, selected } = props
-  const { id, name, path } = message
-  return (
-    <Menu.Item as={Link} to={`${path}`} active={selected} className='Message'>
-      <Header as='h5' size='tiny' color='grey' content={id} />
-      {name}
-    </Menu.Item>
-  )
-}
-
+/**
+ * Component that displays a fullscreen panel that allows browsing all the messages
+ * and signals declared in the loaded DBC, and display their realtime value. The
+ * browser uses the url location to know what category and message to display.
+ * @component
+ */
 export default function SignalBrowser(props) {
   const { dbc } = useContext(M2)
   const history = useHistory()
@@ -78,5 +52,42 @@ export default function SignalBrowser(props) {
         ))}
       </Segment>
     </div>
+  )
+}
+
+SignalBrowser.propTypes = {
+  /**
+   * Base url path where the browser is mounted
+   */
+  basePath: PropTypes.string.isRequired
+}
+
+// Category Component, a canbus category display
+// Props:
+//   - category: a category object from the dbc
+//   - selected: a boolean indicating if the category is currently selected
+function Category(props) {
+  const { category, selected } = props
+  const { path, name } = category
+  return (
+    <Menu.Item as={Link} to={`../${path}`} active={selected} className='Category'>
+      <Header size='tiny' as='h4' color='grey' content={path} />
+      {name}
+    </Menu.Item>
+  )
+}
+
+// Message Component, a canbus message display
+// Props:
+//   - message: a message object from the dbc
+//   - selected: a boolean indicating if the message is currently selected
+function Message(props) {
+  const { message, selected } = props
+  const { id, name, path } = message
+  return (
+    <Menu.Item as={Link} to={`${path}`} active={selected} className='Message'>
+      <Header as='h5' size='tiny' color='grey' content={id} />
+      {name}
+    </Menu.Item>
   )
 }
