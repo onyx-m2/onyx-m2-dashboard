@@ -1,19 +1,15 @@
-/* The signal browser occupied all the screen space, and creates a 1x3 css
-   grid to display the data. */
-
-.SignalBrowserContainer {
-}
-
-.SignalBrowser {
+/* The favourites panel occupies all the screen space, and creates a 8x3 css
+   grid to display the signals. */
+.FavouritesPanel {
   width: 100%;
   display: grid;
-  grid-template-rows: 1fr;
+  grid-template-rows: repeat(8, 1fr);
   grid-template-columns: repeat(3, 1fr);
-  column-gap: 20px;
+  grid-column-gap: 20px;
+  grid-row-gap: 20px;
 }
 
-
-.SignalBrowser * {
+.FavouritesPanel * {
   text-transform: uppercase !important;
 }
 
@@ -26,6 +22,7 @@
   margin: 0 !important;
 }
 
-.SignalBrowser > .ui.segment {
+.FavouritesPanel > .ui.segment {
+  margin: 0;
   padding: 0;
 }

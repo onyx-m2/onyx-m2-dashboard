@@ -4,7 +4,8 @@ import { Menu, Segment, Header } from 'semantic-ui-react'
 import './SignalBrowser.css'
 import Signal from './Signal'
 import { Link, useParams, useHistory } from 'react-router-dom'
-import M2 from '../services/m2'
+import M2 from '../contexts/M2'
+import { FavouritesContext } from '../contexts/FavouritesContext'
 
 /**
  * Component that displays a fullscreen panel that allows browsing all the messages
@@ -14,6 +15,7 @@ import M2 from '../services/m2'
  */
 export default function SignalBrowser(props) {
   const { dbc } = useContext(M2)
+  const { isFavourite, toggleFavourite } = useContext(FavouritesContext)
   const history = useHistory()
   const { categoryPath, messagePath } = useParams()
   let category = dbc.getCategory(categoryPath)
@@ -35,23 +37,27 @@ export default function SignalBrowser(props) {
   let messages = dbc.getCategoryMessages(categoryPath)
   let signals = dbc.getMessageSignals(message.mnemonic)
   return (
-    <div className='SignalBrowser'>
-      <Menu fluid vertical>
-        {categories.map(c => (
-          <Category key={c.path} category={c} selected={c.path === category.path} />
-        ))}
-      </Menu>
-      <Menu fluid vertical>
-        {messages.map(m => (
-          <Message key={m.id} message={m} selected={m.path === message.path} />
-        ))}
-      </Menu>
-      <Segment>
-        {signals.map(s => (
-          <Signal key={s.mnemonic} mnemonic={s.mnemonic} />
-        ))}
-      </Segment>
-    </div>
+    // <div className='SignalBrowserContainer'>
+      <div className='SignalBrowser'>
+        <Menu fluid vertical>
+          {categories.map(c => (
+            <Category key={c.path} category={c} selected={c.path === category.path} />
+          ))}
+        </Menu>
+        <Menu fluid vertical>
+          {messages.map(m => (
+            <Message key={m.id} message={m} selected={m.path === message.path} />
+          ))}
+        </Menu>
+        {/* <Segment> */}
+        <Segment>
+          {signals.map(s => (
+            <Signal key={s.mnemonic} mnemonic={s.mnemonic} icon={isFavourite(s.mnemonic) ? 'olive star' : ''} onClick={() => toggleFavourite(s.mnemonic)} />
+          ))}
+        </Segment>
+        {/* </Segment> */}
+      </div>
+    //</div>
   )
 }
 

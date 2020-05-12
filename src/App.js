@@ -1,12 +1,15 @@
 import React, { useState } from 'react'
-import { BrowserRouter, Switch, Route, Link, Redirect } from 'react-router-dom'
+import { BrowserRouter, Switch, Route, Link, Redirect, NavLink } from 'react-router-dom'
 import 'react-semantic-toasts/styles/react-semantic-alert.css';
 import { useSwipeable } from 'react-swipeable'
 import './App.css'
 import SignalBrowser from './components/SignalBrowser'
 import { Sidebar, Menu, Icon } from 'semantic-ui-react'
-import { usePingPongState, useStatusState } from './services/m2'
+import { usePingPongState, useStatusState } from './contexts/M2'
 import ConnectionPopup from './components/ConnectionPopup';
+import FavouritesPanel from './components/FavouritesPanel';
+import SnifferPanel from './components/SnifferPanel';
+import { FavouritesProvider } from './contexts/FavouritesContext';
 
 /**
  * The App component uses the router to navigate to different panels in the app.
@@ -34,17 +37,17 @@ export default function App() {
           icon='labeled' inverted vertical width='thin'
           visible={sidebarVisible} onClick={() => setSidebarVisible(!sidebarVisible)}
         >
-          <Menu.Item as={Link} to='/'>
-            <Icon name='home' />
-            Home
+          <Menu.Item as={NavLink} to='/' exact>
+            <Icon name='outline favorite' />
+            Favourites
           </Menu.Item>
-          <Menu.Item as={Link} to='/signals'>
+          <Menu.Item as={NavLink} to='/signals'>
             <Icon name='random' />
             Signals
           </Menu.Item>
-          <Menu.Item as='a'>
-            <Icon name='camera' />
-            Channels
+          <Menu.Item as={NavLink} to='/sniffer'>
+            <Icon name='braille' />
+            Sniffer
           </Menu.Item>
           <Menu.Item>
             <div>{m2Rate} msg/s</div>
@@ -54,14 +57,19 @@ export default function App() {
         </Sidebar>
         <Sidebar.Pusher>
           <div className='App' {...swipers}>
-            <Switch>
-              <Route exact path='/signals/:categoryPath?/:messagePath?'>
-                <SignalBrowser basePath='/signals' />
-              </Route>
-              <Route exact path='/'>
-                <Redirect to='/signals' />
-              </Route>
-            </Switch>
+            <FavouritesProvider>
+              <Switch>
+                <Route exact path='/'>
+                  <FavouritesPanel />
+                </Route>
+                <Route exact path='/signals/:categoryPath?/:messagePath?'>
+                  <SignalBrowser basePath='/signals' />
+                </Route>
+                <Route exact path='/sniffer'>
+                  <SnifferPanel />
+                </Route>
+              </Switch>
+            </FavouritesProvider>
           </div>
         </Sidebar.Pusher>
       </Sidebar.Pushable>

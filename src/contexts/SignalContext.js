@@ -1,4 +1,4 @@
-import M2 from './m2'
+import M2 from './M2'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
 export const SignalContext = createContext()

@@ -1,14 +1,16 @@
 import React, { useContext } from 'react'
 import PropTypes from 'prop-types'
 import './Signal.css'
-import M2 from '../services/m2'
-import { useSignalState } from '../services/signal-manager'
+import M2 from '../contexts/M2'
+import { useSignalState } from '../contexts/SignalContext'
+import { Icon } from 'semantic-ui-react'
 
 /**
  * Component displaying a realtime canbus signal.
  * @component
  */
 export default function Signal(props) {
+  const { onClick, icon } = props
   const decimals = props.decimals || 2
   const { dbc } = useContext(M2)
 
@@ -29,8 +31,8 @@ export default function Signal(props) {
   }
 
   return (
-    <div className='Signal'>
-      <div>{definition.name}</div>
+    <div className='Signal' onClick={onClick}>
+      <div>{icon && <Icon name={icon} />}{definition.name}</div>
       <div className='data'>
         <div className='value'>{displayValue}</div>
         <div className='units'>{displayUnits}</div>

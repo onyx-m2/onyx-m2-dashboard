@@ -7,9 +7,9 @@ import axios from 'axios'
 import App from './App';
 import * as serviceWorker from './serviceWorker'
 
-import { M2Provider } from './services/m2'
-import { SignalProvider } from './services/signal-manager';
-import DBC from './services/dbc'
+import { M2Provider } from './contexts/M2'
+import { SignalProvider } from './contexts/SignalContext';
+import DBC from './utils/DBC'
 import { Loader } from 'semantic-ui-react';
 
 const secure = process.env.REACT_APP_M2_SECURE === 'true'
