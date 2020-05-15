@@ -1,11 +1,13 @@
 import React, { useContext } from 'react'
 import PropTypes from 'prop-types'
-import { Menu, Segment, Header } from 'semantic-ui-react'
-import './SignalBrowser.css'
+import { Menu, Header } from 'semantic-ui-react'
 import Signal from './Signal'
 import { Link, useParams, useHistory } from 'react-router-dom'
 import M2 from '../contexts/M2'
 import { FavouritesContext } from '../contexts/FavouritesContext'
+import { Grid } from 'styled-css-grid'
+import { ScrollContainer, Tile } from './Base'
+import styled from 'styled-components'
 
 /**
  * Component that displays a fullscreen panel that allows browsing all the messages
@@ -37,27 +39,23 @@ export default function SignalBrowser(props) {
   let messages = dbc.getCategoryMessages(categoryPath)
   let signals = dbc.getMessageSignals(message.mnemonic)
   return (
-    // <div className='SignalBrowserContainer'>
-      <div className='SignalBrowser'>
-        <Menu fluid vertical>
-          {categories.map(c => (
-            <Category key={c.path} category={c} selected={c.path === category.path} />
-          ))}
-        </Menu>
-        <Menu fluid vertical>
-          {messages.map(m => (
-            <Message key={m.id} message={m} selected={m.path === message.path} />
-          ))}
-        </Menu>
-        {/* <Segment> */}
-        <Segment>
-          {signals.map(s => (
-            <Signal key={s.mnemonic} mnemonic={s.mnemonic} icon={isFavourite(s.mnemonic) ? 'olive star' : ''} onClick={() => toggleFavourite(s.mnemonic)} />
-          ))}
-        </Segment>
-        {/* </Segment> */}
-      </div>
-    //</div>
+    <Grid gap='20px' row={1} columns={3}>
+      <ScrollContainer as={Menu} fluid vertical>
+        {categories.map(c => (
+          <MenuItem key={c.path} path={c.path} header={c.path} name={c.name} selected={c.path === category.path} />
+        ))}
+      </ScrollContainer>
+      <ScrollContainer as={Menu} fluid vertical>
+        {messages.map(m => (
+          <MenuItem key={m.path} path={category.path + '/' + m.path} header={m.id} name={m.name} selected={m.path === message.path} />
+        ))}
+      </ScrollContainer>
+      <Tile>
+        {signals.map(s => (
+          <Signal key={s.mnemonic} mnemonic={s.mnemonic} icon={isFavourite(s.mnemonic) ? 'olive star' : ''} onClick={() => toggleFavourite(s.mnemonic)} />
+        ))}
+      </Tile>
+    </Grid>
   )
 }
 
@@ -68,32 +66,16 @@ SignalBrowser.propTypes = {
   basePath: PropTypes.string.isRequired
 }
 
-// Category Component, a canbus category display
-// Props:
-//   - category: a category object from the dbc
-//   - selected: a boolean indicating if the category is currently selected
-function Category(props) {
-  const { category, selected } = props
-  const { path, name } = category
+function MenuItem(props) {
+  const { path, header, name, selected } = props
   return (
-    <Menu.Item as={Link} to={`../${path}`} active={selected} className='Category'>
-      <Header size='tiny' as='h4' color='grey' content={path} />
+    <Menu.Item as={UpperCaseLink} to={`../${path}`} active={selected}>
+      <Header size='tiny' as='h4' color='grey' content={header} />
       {name}
     </Menu.Item>
   )
 }
 
-// Message Component, a canbus message display
-// Props:
-//   - message: a message object from the dbc
-//   - selected: a boolean indicating if the message is currently selected
-function Message(props) {
-  const { message, selected } = props
-  const { id, name, path } = message
-  return (
-    <Menu.Item as={Link} to={`${path}`} active={selected} className='Message'>
-      <Header as='h5' size='tiny' color='grey' content={id} />
-      {name}
-    </Menu.Item>
-  )
-}
+const UpperCaseLink = styled(Link)`
+  text-transform: uppercase !important;
+`

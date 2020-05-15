@@ -1,13 +1,11 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import PropTypes from 'prop-types'
-import { Menu, Segment, Header } from 'semantic-ui-react'
-import './FavouritesPanel.css'
 import Signal from './Signal'
-import { Link, useParams, useHistory } from 'react-router-dom'
-import { useDrag, DndProvider } from 'react-dnd'
-import Backend from 'react-dnd-html5-backend'
-import M2 from '../contexts/M2'
 import { FavouritesContext } from '../contexts/FavouritesContext'
+import { Grid, Cell } from 'styled-css-grid'
+import { useDrag } from 'react-use-gesture'
+import { DraggableTile } from './Base'
+import styled from 'styled-components'
 
 /**
  * Component that displays ...
@@ -16,24 +14,24 @@ import { FavouritesContext } from '../contexts/FavouritesContext'
 export default function FavouritesPanel() {
   const { favourites } = useContext(FavouritesContext)
   return (
-    <div className='FavouritesPanel'>
-      <DndProvider backend={Backend}>
+    <Grid gap='20px' rows={8} columns={6}>
       {favourites.map(mnemonic => (
-        <SignalCard key={mnemonic} signal={mnemonic} />
+          <SignalTile key={mnemonic} signal={mnemonic} />
       ))}
-      </DndProvider>
-    </div>
+    </Grid>
   )
 }
 
-function SignalCard(props) {
+function SignalTile(props) {
   const { signal } = props
-  const [collectedProps, drag] = useDrag({
-    item: { type: 'card' },
+  const [ dragOffset, setDragOffset ] = useState({ x: 0, y: 0 })
+  const drag = useDrag(({ event, offset: [x, y] }) => {
+    setDragOffset({x, y})
+    event.stopPropagation()
   })
   return (
-    <Segment ref={drag}>
+    <DraggableTile as={Cell} width={2} {...drag()} to={dragOffset} >
       <Signal mnemonic={signal} />
-    </Segment>
+    </DraggableTile>
   )
 }

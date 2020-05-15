@@ -1,15 +1,17 @@
 import React, { useState } from 'react'
 import { BrowserRouter, Switch, Route, Link, Redirect, NavLink } from 'react-router-dom'
 import 'react-semantic-toasts/styles/react-semantic-alert.css';
-import { useSwipeable } from 'react-swipeable'
-import './App.css'
+import { useDrag } from 'react-use-gesture'
+//import './App.css'
 import SignalBrowser from './components/SignalBrowser'
-import { Sidebar, Menu, Icon } from 'semantic-ui-react'
+import { Icon } from 'semantic-ui-react'
 import { usePingPongState, useStatusState } from './contexts/M2'
 import ConnectionPopup from './components/ConnectionPopup';
 import FavouritesPanel from './components/FavouritesPanel';
 import SnifferPanel from './components/SnifferPanel';
 import { FavouritesProvider } from './contexts/FavouritesContext';
+import styled from 'styled-components';
+import { Grid } from 'styled-css-grid';
 
 /**
  * The App component uses the router to navigate to different panels in the app.
@@ -21,59 +23,127 @@ export default function App() {
   const [ appIsOnline, appLatency ] = usePingPongState(1000, 4000)
   const [ m2IsOnline, m2Latency, m2Rate ] = useStatusState()
 
-  const swipers = useSwipeable({
-    onSwipedLeft: () => setSidebarVisible(false),
-    onSwipedRight: () => setSidebarVisible(true),
-    preventDefaultTouchmoveEvent: true,
-    trackMouse: true
-  });
+  const [ panelPos, setPanelPos ] = useState(0)
+  const drag = useDrag(({ down, movement: [x] }) => {
+    if (x !== 0) {
+      if (down) {
+        if (x > 0) {
+          if (panelPos === 0) {
+            setSidebarVisible(true)
+          }
+          setPanelPos(Math.min(x, 150))
+        } else {
+          if (panelPos === 0) {
+            setSidebarVisible(false)
+          }
+          setPanelPos(Math.min(-x, 0))
+        }
+      }
+      else {
+        if (x > 75) {
+          setSidebarVisible(true)
+          setPanelPos(150)
+        } else {
+          setSidebarVisible(false)
+          setPanelPos(0)
+        }
+      }
+    }
+  }, {
+    axis: 'x',
+    rubberband: true
+  })
 
-  let [ sidebarVisible, setSidebarVisible ] = useState(false)
+  let [ sidebarVisible, setSidebarVisible ] = useState(true)
+
+  function handleMenuClick(e) {
+    if (sidebarVisible) {
+      setSidebarVisible(false)
+      setPanelPos(0)
+    }
+  }
 
   return (
     <BrowserRouter>
-      <Sidebar.Pushable>
-        <Sidebar as={Menu} borderless animation='uncover' direction='left'
-          icon='labeled' inverted vertical width='thin'
-          visible={sidebarVisible} onClick={() => setSidebarVisible(!sidebarVisible)}
-        >
-          <Menu.Item as={NavLink} to='/' exact>
-            <Icon name='outline favorite' />
-            Favourites
-          </Menu.Item>
-          <Menu.Item as={NavLink} to='/signals'>
-            <Icon name='random' />
-            Signals
-          </Menu.Item>
-          <Menu.Item as={NavLink} to='/sniffer'>
-            <Icon name='braille' />
-            Sniffer
-          </Menu.Item>
-          <Menu.Item>
-            <div>{m2Rate} msg/s</div>
-            <div>App: {appLatency} ms</div>
-            <div>M2: {m2Latency} ms</div>
-          </Menu.Item>
-        </Sidebar>
-        <Sidebar.Pusher>
-          <div className='App' {...swipers}>
-            <FavouritesProvider>
-              <Switch>
-                <Route exact path='/'>
-                  <FavouritesPanel />
-                </Route>
-                <Route exact path='/signals/:categoryPath?/:messagePath?'>
-                  <SignalBrowser basePath='/signals' />
-                </Route>
-                <Route exact path='/sniffer'>
-                  <SnifferPanel />
-                </Route>
-              </Switch>
-            </FavouritesProvider>
-          </div>
-        </Sidebar.Pusher>
-      </Sidebar.Pushable>
+      <NavMenu as={Grid} columns={1} gap={0} alignContent='start' visible={sidebarVisible} onClick={handleMenuClick}>
+        <NavMenuItem as={NavLink} to='/' exact>
+          <Icon size='big' name='outline favorite' />
+          Favourites
+        </NavMenuItem>
+        <NavMenuItem as={NavLink} to='/signals'>
+          <Icon size='big' name='random' />
+          Signals
+        </NavMenuItem>
+        <NavMenuItem as={NavLink} to='/sniffer'>
+          <Icon size='big' name='braille' />
+          Sniffer
+        </NavMenuItem>
+        <div style={{position: 'absolute', bottom: '0', padding: '20px'}}>
+          <div>{m2Rate} msg/s</div>
+          <div>App: {appLatency} ms</div>
+          <div>M2: {m2Latency} ms</div>
+        </div>
+      </NavMenu>
+      <PanelBacking {...drag()} position={panelPos}>
+        <FavouritesProvider>
+          <Switch>
+            <Route exact path='/'>
+              <FavouritesPanel />
+            </Route>
+            <Route exact path='/signals/:categoryPath?/:messagePath?'>
+              <SignalBrowser basePath='/signals' />
+            </Route>
+            <Route exact path='/sniffer'>
+              <SnifferPanel />
+            </Route>
+          </Switch>
+        </FavouritesProvider>
+      </PanelBacking>
       <ConnectionPopup app={appIsOnline} m2={m2IsOnline} />
     </BrowserRouter>
   )
 }
+
+const PanelBacking = styled.div`
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  width: 100vw;
+  z-index: 2;
+  transform: ${props => `translate3d(${props.position}px, 0, 0)`};
+  padding: 10px 20px 20px 20px;
+  display: flex;
+  background-color: #fafafa;
+  &.inverted {
+    background-color: rgb(9,9,9);
+  }
+`
+
+const NavMenu = styled.div`
+  position: fixed;
+  height: 100vh;
+  width: 150px;
+  border: none;
+  background: #000;
+  box-shadow: none;
+  text-align: center;
+  & * {
+    color: white;
+  }
+`
+const NavMenuItem = styled.div`
+  background-color: black;
+  & > i {
+    margin-bottom: 10px;
+  }
+  &.active {
+    font-weight: 700;
+    background-color: hsla(0,0%,100%,.15);
+  }
+  &:hover {
+    color: white;
+    background: hsla(0,0%,100%,.08);
+  }
+  min-width: 6em;
+  padding: 20px;
+`
