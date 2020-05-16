@@ -1,68 +1,85 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a React web app designed to be run on a Tesla Model 3/Y center screen.
+It displays live CAN bus data from the car, without any unsightly wires or auxiliary
+display.
 
-## Available Scripts
+It does this by hooking into the car's CAN bus under the rear console using a
+Macchina M2 and custom firmware ([onyx-m2-firmware](https://github.com/johnmccalla/tesla-onyx-m2-firmware)), which uses your phone's hotspot to connect to the
+[onyx-m2-server](https://github.com/johnmccalla/tesla-onyx-m2-server), which this app
+connects to using the car's wireless connection (so it requires premium connectivity).
 
-In the project directory, you can run:
+## Usage
 
-### `npm start`
+The dashboard's home panel is a configurable grid of signals widgets. You may add and remove them using the signal, resize them, and move them around the display.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+![Alt text](docs/favourites.png?raw=true "Favourites")
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+The signal viewer allows you to navigate all available signals and tap the ones you
+want added to the favourites panel.
 
-### `npm test`
+![Alt text](docs/signals.png?raw=true "Signals")
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+To navigate between panels, drag the main panel left to reveal the navigation menu.
 
-### `npm run build`
+![Alt text](docs/navmenu.png?raw=true "Nav Menu")
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Design
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+The interface is designed to resemble the Tesla UI. It used the same fonts and similar
+styling, in both day and night mode. The background is designed to appear to be part of
+browser's frame to give a seamless look.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Installing
 
-### `npm run eject`
+Clone the repo and install.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```
+  git clone git@github.com:johnmccalla/onyx-m2-dashboard.git
+  cd onyx-m2-dashboard
+  npm install
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Next configure the app by creating a `.env` file.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```
+PORT=4000
+REACT_APP_M2_SECURE=false
+REACT_APP_M2_HOSTNAME=localhost:8080
+REACT_APP_M2_AUTHORIZATION=XXX
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+The `M2_HOSTNAME` is the hostname of the Onyx M2 Server to connect to, and `M2_SECURE`
+determines if you'll connect using SSL, which is more and more of a requirement but
+awkward for local development. The `M2_AUTHORIZATION` is a shared secret between the
+firmware, server, and app allowing every component to authenticate. (This could be
+improved.)
 
-## Learn More
+Of course, for the car to be able to connect to the app, it needs to be available on
+the public internet. I recommend using `ngrok` for local development, although be
+warned you'll need two tunnels (one for this app and one for the server).
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Once all this is done, start the app
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
+  npm start
+```
 
-### Code Splitting
+I highly recommend running a production build in the car itself, see deployment section
+for suggestions on how to do this.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+## Deployment
 
-### Analyzing the Bundle Size
+I currently use `AWS Amplitude` for deployment, and am really happy with it. It pretty
+much handles everything and can hook up to the GitHub repo for auto-deploying.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+TODO: provide step by step instructions
 
-### Making a Progressive Web App
+If you'd rather server locally, use `serve` by doing `npm install -g serve` once, and
+then build and serve the app.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+```
+  npm run build
+  serve -s build -l 4000
+```
 
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+Note that the app was created with `create-react-app`, so any deployment tool that
+supports this very popular tooling should be compatible.
