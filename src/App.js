@@ -99,7 +99,7 @@ export default function App() {
           </Switch>
         </FavouritesProvider>
       </PanelBacking>
-      <ConnectionPopup app={appIsOnline} m2={m2IsOnline} />
+      <ConnectionPopup appStatus={appIsOnline} m2Status={m2IsOnline} />
     </BrowserRouter>
   )
 }

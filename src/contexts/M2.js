@@ -1,4 +1,5 @@
 import React, { createContext, useEffect, useContext, useState } from 'react'
+import { ws } from '../utils/services'
 
 const M2 = createContext()
 export default M2
@@ -9,7 +10,7 @@ export default M2
  * @param {*} props
  */
 export function M2Provider(props) {
-  const { ws, dbc, children } = props
+  const { dbc, children } = props
   const listeners = new EventTarget()
 
   useEffect(() => {
