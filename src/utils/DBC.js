@@ -5,19 +5,27 @@ export default class DBC {
 
   /**
    * Construct a DBC object using the specified pre-loaded data.
-   * @param {Array} categories The message categories to associate with messages
    * @param {Object} definitions The parsed json data containing the message and signal definitions
    */
-  constructor(categories, definitions) {
-    this.categories = categories
-    this.definitions = definitions
+  constructor(definitions) {
+    this.categories = definitions.categories
+    this.messages = definitions.messages
 
     // indexes
     this.messageById = {}
     this.messageBySlug = {}
     this.messageByMnemonic = {}
     this.signalByMnemonic = {}
-    this.definitions.messages.forEach(m => this.indexMessage(m))
+    this.messageBySignalMnemonic = {}
+    this.messages.forEach(m => this.indexMessage(m))
+  }
+
+  /**
+   * Remove indexes from generated JSON representation.
+   */
+  toJSON() {
+    const { categories, messages } = this
+    return { categories, messages }
   }
 
   /**
@@ -26,7 +34,7 @@ export default class DBC {
    */
   addMessage(message) {
     if (!this.getMessageFromId(message.id)) {
-      this.definitions.messages.push(message)
+      this.messages.push(message)
       this.indexMessage(message)
     }
   }
@@ -36,7 +44,7 @@ export default class DBC {
    * @param {String} categorySlug
    * @param {String} messageSlug
    */
-  getMessageFromPath(categorySlug, messageSlug) {
+  getMessageFromSlugs(categorySlug, messageSlug) {
     return this.messageBySlug[categorySlug + '/' + messageSlug]
   }
 
@@ -83,7 +91,7 @@ export default class DBC {
    * @param {String} slug
    */
   getCategory(slug) {
-    return this.categories.find(c => c.path === slug)
+    return this.categories.find(c => c.slug === slug)
   }
 
   /**
@@ -91,7 +99,7 @@ export default class DBC {
    * @param {String} slug
    */
   getFirstCategoryMessage(slug) {
-    return this.definitions.messages.find(m => m.category === slug)
+    return this.messages.find(m => m.category === slug)
   }
 
   /**
@@ -99,7 +107,7 @@ export default class DBC {
    * @param {String} slug
    */
   getCategoryMessages(slug) {
-    return this.definitions.messages.filter(m => m.category === slug)
+    return this.messages.filter(m => m.category === slug)
   }
 
   /**
@@ -123,25 +131,31 @@ export default class DBC {
     return signals
   }
 
+  getSignalMessage(mnemonic) {
+    return this.messageBySignalMnemonic[mnemonic]
+  }
+
   indexMessage(message) {
     this.messageById[message.id] = message
-    this.messageBySlug[message.category + '/' + message.path] = message
+    this.messageBySlug[message.category + '/' + message.slug] = message
     this.messageByMnemonic[message.mnemonic] = message
     if (message.signals) {
       message.signals.forEach(s => {
-        s.message = message
+        this.messageBySignalMnemonic[s.mnemonic] = message
         this.signalByMnemonic[s.mnemonic] = s
       })
     }
     if (message.multiplexor) {
-      message.multiplexor.message = message
-      this.signalByMnemonic[message.multiplexor.mnemonic] = message.multiplexor
+      const { mnemonic } = message.multiplexor
+      this.messageBySignalMnemonic[mnemonic] = message
+      this.signalByMnemonic[mnemonic] = message.multiplexor
     }
     if (message.multiplexed) {
       Object.values(message.multiplexed).flat().forEach(s => {
-        s.message = message
+        this.messageBySignalMnemonic[s.mnemonic] = message
         this.signalByMnemonic[s.mnemonic] = s
       })
     }
   }
+
 }

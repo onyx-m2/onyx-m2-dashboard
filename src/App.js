@@ -90,7 +90,7 @@ export default function App() {
             <Route exact path='/'>
               <FavouritesPanel />
             </Route>
-            <Route exact path='/signals/:categoryPath?/:messagePath?'>
+            <Route exact path='/signals/:categorySlug?/:messageSlug?'>
               <SignalBrowser basePath='/signals' />
             </Route>
             <Route exact path='/sniffer'>

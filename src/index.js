@@ -12,20 +12,16 @@ import { m2 } from './utils/services'
 import { Loader } from 'semantic-ui-react';
 
 /**
- * Load the DBC for the specified car model.
- * @param {String} model Car model, currently only 'tm3' is supported
+ * Load the DBC from the server.
  */
 async function loadDBC(model) {
   while (true) {
     try {
-      const [categories, definitions] = await Promise.all([
-        m2.get(`/dbc/${model}/categories.json`),
-        m2.get(`/dbc/${model}/definitions.json`)
-      ])
-      return new DBC(categories.data, definitions.data)
+      const definitions = await m2.get('/dbc')
+      return new DBC(definitions.data)
     }
-    catch {
-      console.warn('Unable to load DBC, retrying in 1 second')
+    catch (e) {
+      console.warn(`Unable to load DBC (${e.message}), retrying in 1 second`)
       await new Promise(r => setTimeout(r, 1000))
     }
   }
@@ -35,7 +31,7 @@ async function loadDBC(model) {
  * Initialize the application, and render once all the data is loaded.
  */
 async function init() {
-  const dbc = await loadDBC('tm3')
+  const dbc = await loadDBC()
   ReactDOM.render(
     <React.StrictMode>
       <M2Provider dbc={dbc}>
