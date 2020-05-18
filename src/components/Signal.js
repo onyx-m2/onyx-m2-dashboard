@@ -23,17 +23,22 @@ export default function Signal(props) {
   }
 
   const definition = dbc.getSignal(props.mnemonic)
-  let displayUnits = definition.units
-  if (definition.values) {
-    const definedValue = definition.values[definition.value]
-    if (definedValue) {
-      displayUnits = definedValue.replace(/_/g, ' ')
+  let displayUnits = 'N/A'
+  let displayName = props.mnemonic
+  if (definition) {
+    displayName = definition.name
+    displayUnits = definition.units
+    if (definition.values) {
+      const definedValue = definition.values[definition.value]
+      if (definedValue) {
+        displayUnits = definedValue.replace(/_/g, ' ')
+      }
     }
   }
 
   return (
     <SignalGrid gap='10px' rows={1} columns={'2fr 1fr'} onClick={onClick}>
-      <div>{icon && <Icon name={icon} />}{definition.name}</div>
+      <div>{icon && <Icon name={icon} />}{displayName}</div>
       <Data>
         <Value>{displayValue}</Value>
         <Units>{displayUnits}</Units>
