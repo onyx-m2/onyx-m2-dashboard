@@ -22,7 +22,6 @@ export default function FavouritesPanel() {
   const tilesRef = useRef([])
   const [ placeholdersVisible, setPlaceholdersVisible ] = useState(false)
 
-  let dragZ = 0
   const drag = useDrag(({ args: [favourite, ref], event, down, movement: [dx, dy] }) => {
     const { style } = tilesRef.current[ref]
     if (down) {

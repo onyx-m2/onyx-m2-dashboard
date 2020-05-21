@@ -1,7 +1,10 @@
-export function load(name) {
-  return JSON.parse(localStorage.getItem(name))
+export function load(name, version) {
+  const bundle = JSON.parse(localStorage.getItem(name))
+  if (bundle.version === version) {
+    return bundle.data
+  }
 }
 
-export function save(name, data) {
-  localStorage.setItem(name, JSON.stringify(data))
+export function save(name, version, data) {
+  localStorage.setItem(name, JSON.stringify({version, data}))
 }

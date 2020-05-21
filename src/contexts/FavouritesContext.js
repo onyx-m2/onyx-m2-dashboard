@@ -3,6 +3,8 @@ import { load, save } from '../utils/persistance'
 
 export const FavouritesContext = createContext()
 
+const SCHEMA_VERSION = 1
+
 /**
  * Context provider that gives access to a list of favourite signals.
  * @param {*} props
@@ -10,7 +12,7 @@ export const FavouritesContext = createContext()
 export function FavouritesProvider(props) {
   const { children } = props
 
-  const [favourites, setFavourites] = useState(load('favourites') || [])
+  const [favourites, setFavourites] = useState(load('favourites', SCHEMA_VERSION) || [])
   function toggleFavourite(signal) {
     const index = favourites.findIndex(x => x.signal === signal)
     let updated
@@ -33,7 +35,7 @@ export function FavouritesProvider(props) {
       const favourite = favourites[index]
       const updated = favourites.slice(0, index).concat({ signal, left, top, width: favourite.width || 2, height: favourite.height || 1 }, favourites.slice(index + 1))
       setFavourites(updated)
-      save('favourites', updated)
+      save('favourites', SCHEMA_VERSION, updated)
     }
   }
 
