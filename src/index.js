@@ -6,10 +6,10 @@ import App from './App';
 import * as serviceWorker from './serviceWorker'
 
 import { M2Provider } from './contexts/M2'
-import { SignalProvider } from './contexts/SignalContext';
+import { SignalProvider } from './contexts/SignalContext'
 import DBC from './utils/DBC'
 import { m2 } from './utils/services'
-import { Loader } from 'semantic-ui-react';
+import { Loader } from 'semantic-ui-react'
 
 /**
  * Load the DBC from the server.

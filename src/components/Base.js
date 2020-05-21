@@ -20,5 +20,4 @@ export const DraggableTile = styled(Tile)`
   &:active {
     cursor: move;
   }
-  transform: ${props => `translate3d(${props.to.x}px, ${props.to.y}px, 0)`};
 `

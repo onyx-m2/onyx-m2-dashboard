@@ -11,24 +11,34 @@ export function FavouritesProvider(props) {
   const { children } = props
 
   const [favourites, setFavourites] = useState(load('favourites') || [])
-  function toggleFavourite(mnemonic) {
-    const index = favourites.findIndex(x => x === mnemonic)
+  function toggleFavourite(signal) {
+    const index = favourites.findIndex(x => x.signal === signal)
     let updated
     if (index === -1) {
-      updated = favourites.concat(mnemonic)
+      updated = favourites.concat({ signal, top: 1, left: 1, width: 2, height: 1 })
     } else {
-      updated = favourites.filter(x => x !== mnemonic)
+      updated = favourites.filter(x => x.signal !== signal)
     }
     setFavourites(updated)
     save('favourites', updated)
   }
 
-  function isFavourite(mnemonic) {
-    return favourites.findIndex(x => x === mnemonic) !== -1
+  function isFavourite(signal) {
+    return favourites.findIndex(x => x.signal === signal) !== -1
+  }
+
+  function moveFavourite(signal, left, top) {
+    const index = favourites.findIndex(x => x.signal === signal)
+    if (index !== -1) {
+      const favourite = favourites[index]
+      const updated = favourites.slice(0, index).concat({ signal, left, top, width: favourite.width || 2, height: favourite.height || 1 }, favourites.slice(index + 1))
+      setFavourites(updated)
+      save('favourites', updated)
+    }
   }
 
   return (
-    <FavouritesContext.Provider value={{ favourites, isFavourite, toggleFavourite }}>
+    <FavouritesContext.Provider value={{ favourites, isFavourite, toggleFavourite, moveFavourite }}>
       {children}
     </FavouritesContext.Provider>
   )

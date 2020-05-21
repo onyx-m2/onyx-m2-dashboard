@@ -44,12 +44,12 @@ ConnectionPopup.propTypes = {
   /**
    * Indicates whether the app is online (can reach the M2 server)
    */
-  app: PropTypes.bool.isRequired,
+  appStatus: PropTypes.bool.isRequired,
 
   /**
    * Indicates whether M2 is online (i.e. the M2 is able to reach the M2 server)
    */
-  m2: PropTypes.bool.isRequired
+  m2Status: PropTypes.bool.isRequired
 }
 
 function LoadingIcon(props) {
