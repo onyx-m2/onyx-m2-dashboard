@@ -9,7 +9,7 @@ import { M2Provider } from './contexts/M2'
 import { SignalProvider } from './contexts/SignalContext'
 import DBC from './utils/DBC'
 import { m2 } from './utils/services'
-import { Loader } from 'semantic-ui-react'
+import { Panel, Spinner } from './components/Base';
 
 /**
  * Load the DBC from the server.
@@ -47,7 +47,9 @@ async function init() {
 // Render a loading screen until the actual initialization is done
 init()
 ReactDOM.render(
-  <Loader style={{height: '100vh'}} active size='massive'>Loading</Loader>,
+  <Panel>
+    <Spinner color='rgb(201,0,0)' image='favicon.png' />
+  </Panel>,
   document.getElementById('root')
 )
 

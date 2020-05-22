@@ -6,6 +6,7 @@ import { Grid, Cell } from 'styled-css-grid'
 import { useDrag } from 'react-use-gesture'
 import { Tile } from './Base'
 import styled from 'styled-components'
+import { clamp } from '../utils/utils'
 
 const GRID_ROWS = 8
 const GRID_COLUMNS = 6
@@ -15,7 +16,7 @@ const GRID_GAP = 20
  * Component that displays ...
  * @component
  */
-export default function FavouritesPanel() {
+export default function FavouritesGrid() {
   const { favourites, moveFavourite } = useContext(FavouritesContext)
   const gap = `${GRID_GAP}px`
   const placeholderRef = useRef(null)
@@ -69,16 +70,6 @@ const PlaceholderCell = styled(Cell)`
   border: dashed lightgrey;
   border-radius: 10px;
 `
-
-function clamp(val, min, max) {
-    if (val < min) {
-      return min
-    }
-    if (val > max) {
-      return max
-    }
-    return Math.round(val)
-}
 
 const SignalTile = forwardRef((props, ref) => {
   const { signal } = props

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { BrowserRouter, Switch, Route, Link, Redirect, NavLink } from 'react-router-dom'
 import 'react-semantic-toasts/styles/react-semantic-alert.css';
 import { useDrag } from 'react-use-gesture'
@@ -7,11 +7,13 @@ import SignalBrowser from './components/SignalBrowser'
 import { Icon } from 'semantic-ui-react'
 import { usePingPongState, useStatusState } from './contexts/M2'
 import ConnectionPopup from './components/ConnectionPopup';
-import FavouritesPanel from './components/FavouritesPanel';
+import FavouritesGrid from './components/FavouritesGrid';
 import SnifferPanel from './components/SnifferPanel';
 import { FavouritesProvider } from './contexts/FavouritesContext';
 import styled from 'styled-components';
 import { Grid } from 'styled-css-grid';
+import { Panel } from './components/Base';
+import { clamp } from './utils/utils';
 
 /**
  * The App component uses the router to navigate to different panels in the app.
@@ -23,49 +25,28 @@ export default function App() {
   const [ appIsOnline, appLatency ] = usePingPongState(1000, 4000)
   const [ m2IsOnline, m2Latency, m2Rate ] = useStatusState()
 
-  const [ panelPos, setPanelPos ] = useState(0)
-  const drag = useDrag(({ down, movement: [x] }) => {
-    if (x !== 0) {
-      if (down) {
-        if (x > 0) {
-          if (panelPos === 0) {
-            setSidebarVisible(true)
-          }
-          setPanelPos(Math.min(x, 150))
-        } else {
-          if (panelPos === 0) {
-            setSidebarVisible(false)
-          }
-          setPanelPos(Math.min(-x, 0))
-        }
-      }
-      else {
-        if (x > 75) {
-          setSidebarVisible(true)
-          setPanelPos(150)
-        } else {
-          setSidebarVisible(false)
-          setPanelPos(0)
-        }
-      }
+  const panelRef = useRef(null)
+  const panelPos = useRef(0)
+  const drag = useDrag(({ down, movement: [dx] }) => {
+    const { style } = panelRef.current
+    let x = clamp(panelPos.current + dx, 0, 150)
+    if (!down) {
+      x = panelPos.current = (x > 75) ? 150 : 0
     }
+    style.transform = `translate3d(${x}px, 0, 0)`
   }, {
     axis: 'x',
     rubberband: true
   })
 
-  let [ sidebarVisible, setSidebarVisible ] = useState(true)
-
-  function handleMenuClick(e) {
-    if (sidebarVisible) {
-      setSidebarVisible(false)
-      setPanelPos(0)
-    }
+  function handleNavMenuClick(e) {
+    panelPos.current = 0
+    panelRef.current.style.transform = `translate3d(0, 0, 0)`
   }
 
   return (
     <BrowserRouter>
-      <NavMenu as={Grid} columns={1} gap={0} alignContent='start' visible={sidebarVisible} onClick={handleMenuClick}>
+      <NavMenu as={Grid} columns={1} gap={0} alignContent='start' onClick={handleNavMenuClick}>
         <NavMenuItem as={NavLink} to='/' exact>
           <Icon size='big' name='outline favorite' />
           Favourites
@@ -84,11 +65,11 @@ export default function App() {
           <div>M2: {m2Latency} ms</div>
         </div>
       </NavMenu>
-      <PanelBacking {...drag()} position={panelPos}>
+      <Panel {...drag()} ref={panelRef}>
         <FavouritesProvider>
           <Switch>
             <Route exact path='/'>
-              <FavouritesPanel />
+              <FavouritesGrid />
             </Route>
             <Route exact path='/signals/:categorySlug?/:messageSlug?'>
               <SignalBrowser basePath='/signals' />
@@ -98,26 +79,11 @@ export default function App() {
             </Route>
           </Switch>
         </FavouritesProvider>
-      </PanelBacking>
+      </Panel>
       <ConnectionPopup appStatus={appIsOnline} m2Status={m2IsOnline} />
     </BrowserRouter>
   )
 }
-
-const PanelBacking = styled.div`
-  position: fixed;
-  top: 0;
-  height: 100vh;
-  width: 100vw;
-  z-index: 2;
-  transform: ${props => `translate3d(${props.position}px, 0, 0)`};
-  padding: 10px 20px 20px 20px;
-  display: flex;
-  background-color: #fafafa;
-  &.inverted {
-    background-color: rgb(9,9,9);
-  }
-`
 
 const NavMenu = styled.div`
   position: fixed;
