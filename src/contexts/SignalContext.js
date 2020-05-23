@@ -23,7 +23,7 @@ export function SignalProvider(props) {
       signalListeners = allSignalsListeners[mnemonic] = []
     }
     if (signalListeners.length === 0) {
-      send('subscribe', mnemonic)
+      send('subscribe', [mnemonic])
     }
     signalListeners.push(handler)
   }
@@ -36,7 +36,7 @@ export function SignalProvider(props) {
         signalListeners.splice(index, 1)
       }
       if (signalListeners.length === 0) {
-        send('unsubscribe', mnemonic)
+        send('unsubscribe', [mnemonic])
         delete allSignalsListeners[mnemonic]
       }
     }
@@ -45,11 +45,12 @@ export function SignalProvider(props) {
   // handle ingress signals by dispatching them to the listeners
   useEffect(() => {
     function handleSignal(event) {
-      const { mnemonic, value } = event.detail
-      for (let i in allSignalsListeners[mnemonic]) {
-        const handler = allSignalsListeners[mnemonic][i]
-        handler(value)
-      }
+      event.detail.forEach(([ mnemonic, value ]) => {
+        for (let i in allSignalsListeners[mnemonic]) {
+          const handler = allSignalsListeners[mnemonic][i]
+          handler(value)
+        }
+      })
     }
     listeners.addEventListener('signal', handleSignal)
     return () => listeners.removeEventListener('signal', handleSignal)
@@ -58,9 +59,8 @@ export function SignalProvider(props) {
   // handle reconnects by re-subscribing to the signals we require
   useEffect(() => {
     function handleHello() {
-      for (let mnemonic in allSignalsListeners) {
-        send('subscribe', mnemonic)
-      }
+      const signals = Object.keys(allSignalsListeners)
+      send('subscribe', signals)
     }
     listeners.addEventListener('hello', handleHello)
 

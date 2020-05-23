@@ -98,10 +98,10 @@ export function useStatusState() {
   const [ rate, setRate ] = useState(0)
 
   useEffect(() => {
-    function handleStatus(e) {
-      setOnline(e.detail.online)
-      setLatency(e.detail.latency)
-      setRate(e.detail.rate)
+    function handleStatus({ detail: [ online, latency, rate ] }) {
+      setOnline(online)
+      setLatency(latency)
+      setRate(rate)
     }
     listeners.addEventListener('status', handleStatus)
     return () => listeners.removeEventListener('status', handleStatus)
