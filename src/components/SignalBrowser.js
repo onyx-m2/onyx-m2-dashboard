@@ -7,7 +7,7 @@ import M2 from '../contexts/M2'
 import { FavouritesContext } from '../contexts/FavouritesContext'
 import { Grid } from 'styled-css-grid'
 import { ScrollContainer, Tile } from './Base'
-import styled from 'styled-components'
+import styled, { ThemeContext } from 'styled-components'
 
 /**
  * Component that displays a fullscreen panel that allows browsing all the messages
@@ -35,17 +35,19 @@ export default function SignalBrowser(props) {
     history.replace(`${props.basePath}/${category.slug}/${message.slug}`)
   }
 
+  const theme = useContext(ThemeContext)
+
   const categories = dbc.getCategories()
   let messages = dbc.getCategoryMessages(categorySlug)
   let signals = dbc.getMessageSignals(message.mnemonic)
   return (
     <Grid gap='20px' row={1} columns={3}>
-      <ScrollContainer as={Menu} fluid vertical>
+      <ScrollContainer as={Menu} fluid vertical inverted={theme.name === 'night'}>
         {categories.map(c => (
           <MenuItem key={c.slug} slug={c.slug} header={c.slug} name={c.name} selected={c.slug === category.slug} />
         ))}
       </ScrollContainer>
-      <ScrollContainer as={Menu} fluid vertical>
+      <ScrollContainer as={Menu} fluid vertical inverted={theme.name === 'night'}>
         {messages.map(m => (
           <MenuItem key={m.slug} slug={category.slug + '/' + m.slug} header={m.id} name={m.name} selected={m.slug === message.slug} />
         ))}

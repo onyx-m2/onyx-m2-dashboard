@@ -8,10 +8,7 @@ export const Panel = styled.div`
   z-index: 2;
   padding: 10px 20px 20px 20px;
   display: flex;
-  background-color: #fafafa;
-  &.inverted {
-    background-color: rgb(9,9,9);
-  }
+  background-color: ${props => props.theme.background.panel};
 `
 
 export const ScrollContainer = styled.div`
@@ -23,7 +20,8 @@ export const ScrollContainer = styled.div`
 export const Tile = styled.div`
   text-transform: uppercase;
   overflow: auto;
-  background: #FFFFFF;
+  color: ${props => props.theme.text.dark};
+  background: ${props => props.theme.background.component};
   box-shadow: 0 2px 4px 0 rgba(34, 36, 38, 0.12), 0 2px 10px 0 rgba(34, 36, 38, 0.15);
   border-radius: 10px;
   border: none;
@@ -55,7 +53,7 @@ export const Spinner = styled.div`
     height: 260px;
     margin-left: -130px;
     border-radius: 200px;
-    border: 10px solid rgba(201, 0, 0, 0.1);
+    border: 10px solid rgba(${props => props.colour}, 0.1);
   }
 
   &:after {
@@ -66,10 +64,10 @@ export const Spinner = styled.div`
     width: 260px;
     height: 260px;
     margin-left: -130px;
-    animation: loader 1s linear;
+    animation: loader 0.8s linear;
     animation-iteration-count: infinite;
     border-radius: 200px;
-    border-color: rgba(201, 0, 0) transparent transparent;
+    border-color: rgba(${props => props.colour}) transparent transparent;
     border-style: solid;
     border-width: 10px;
     box-shadow: 0px 0px 0px 1px transparent;

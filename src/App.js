@@ -10,10 +10,12 @@ import ConnectionPopup from './components/ConnectionPopup';
 import FavouritesGrid from './components/FavouritesGrid';
 import SnifferPanel from './components/SnifferPanel';
 import { FavouritesProvider } from './contexts/FavouritesContext';
-import styled from 'styled-components';
+import styled, { ThemeProvider } from 'styled-components';
 import { Grid } from 'styled-css-grid';
 import { Panel } from './components/Base';
 import { clamp } from './utils/utils';
+import { useSignalState } from './contexts/SignalContext';
+import { DAY_THEME, NIGHT_THEME } from './theme';
 
 /**
  * The App component uses the router to navigate to different panels in the app.
@@ -38,6 +40,8 @@ export default function App() {
     axis: 'x',
     rubberband: true
   })
+
+  const isSunUp = useSignalState('UI_isSunUp', true)
 
   function handleNavMenuClick(e) {
     panelPos.current = 0
@@ -65,21 +69,23 @@ export default function App() {
           <div>M2: {m2Latency} ms</div>
         </div>
       </NavMenu>
-      <Panel {...drag()} ref={panelRef}>
-        <FavouritesProvider>
-          <Switch>
-            <Route exact path='/'>
-              <FavouritesGrid />
-            </Route>
-            <Route exact path='/signals/:categorySlug?/:messageSlug?'>
-              <SignalBrowser basePath='/signals' />
-            </Route>
-            <Route exact path='/sniffer'>
-              <SnifferPanel />
-            </Route>
-          </Switch>
-        </FavouritesProvider>
-      </Panel>
+      <ThemeProvider theme={isSunUp ? DAY_THEME : NIGHT_THEME}>
+        <Panel {...drag()} ref={panelRef}>
+          <FavouritesProvider>
+            <Switch>
+              <Route exact path='/'>
+                <FavouritesGrid />
+              </Route>
+              <Route exact path='/signals/:categorySlug?/:messageSlug?'>
+                <SignalBrowser basePath='/signals' />
+              </Route>
+              <Route exact path='/sniffer'>
+                <SnifferPanel />
+              </Route>
+            </Switch>
+          </FavouritesProvider>
+        </Panel>
+      </ThemeProvider>
       <ConnectionPopup appStatus={appIsOnline} m2Status={m2IsOnline} />
     </BrowserRouter>
   )

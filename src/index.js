@@ -10,6 +10,7 @@ import { SignalProvider } from './contexts/SignalContext'
 import DBC from './utils/DBC'
 import { m2 } from './utils/services'
 import { Panel, Spinner } from './components/Base';
+import { DAY_THEME } from './theme';
 
 /**
  * Load the DBC from the server.
@@ -47,8 +48,8 @@ async function init() {
 // Render a loading screen until the actual initialization is done
 init()
 ReactDOM.render(
-  <Panel>
-    <Spinner color='rgb(201,0,0)' image='favicon.png' />
+  <Panel theme={DAY_THEME}>
+    <Spinner colour='201,0,0' image='/favicon.png' />
   </Panel>,
   document.getElementById('root')
 )

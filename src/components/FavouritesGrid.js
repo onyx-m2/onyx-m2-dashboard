@@ -67,7 +67,7 @@ export default function FavouritesGrid() {
 
 const PlaceholderCell = styled(Cell)`
   visibility: ${props => props.visible ? 'visible' : 'hidden'};
-  border: dashed lightgrey;
+  border: dashed ${props => props.theme.text.disabled} 2px;
   border-radius: 10px;
 `
 
