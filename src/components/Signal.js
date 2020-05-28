@@ -29,7 +29,7 @@ export default function Signal(props) {
     displayName = definition.name
     displayUnits = definition.units
     if (definition.values) {
-      const definedValue = definition.values[definition.value]
+      const definedValue = definition.values[value]
       if (definedValue) {
         displayUnits = definedValue.replace(/_/g, ' ')
       }

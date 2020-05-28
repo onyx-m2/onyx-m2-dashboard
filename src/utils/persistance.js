@@ -1,6 +1,6 @@
 export function load(name, version) {
   const bundle = JSON.parse(localStorage.getItem(name))
-  if (bundle.version === version) {
+  if (bundle && bundle.version === version) {
     return bundle.data
   }
 }
