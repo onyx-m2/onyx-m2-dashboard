@@ -54,9 +54,10 @@ export function usePingPongState(frequency, timeout) {
   useEffect(() => {
     let at = 0
 
+    let previousCheck = Date.now() // guard against the browser being backgrounded
     const intervalId = setInterval(() => {
       const now = Date.now()
-      if (at !== 0) {
+      if (at !== 0 && ((now - previousCheck) > (2 * frequency))) {
         if (now - at >= timeout) {
           setConnected(false)
           at = 0
@@ -67,6 +68,7 @@ export function usePingPongState(frequency, timeout) {
         at = now
         send('ping')
       }
+      previousCheck = now
     }, frequency)
 
     function handlePong() {
