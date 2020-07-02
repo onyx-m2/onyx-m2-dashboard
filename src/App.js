@@ -1,21 +1,22 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect, useContext } from 'react'
 import { BrowserRouter, Switch, Route, Link, Redirect, NavLink } from 'react-router-dom'
-import 'react-semantic-toasts/styles/react-semantic-alert.css';
+import 'react-semantic-toasts/styles/react-semantic-alert.css'
 import { useDrag } from 'react-use-gesture'
-//import './App.css'
 import SignalBrowser from './components/SignalBrowser'
 import { Icon } from 'semantic-ui-react'
-import { usePingPongState, useStatusState } from './contexts/M2'
-import ConnectionPopup from './components/ConnectionPopup';
-import FavouritesGrid from './components/FavouritesGrid';
-import SnifferPanel from './components/SnifferPanel';
-import { FavouritesProvider } from './contexts/FavouritesContext';
-import styled, { ThemeProvider } from 'styled-components';
-import { Grid } from 'styled-css-grid';
-import { Panel } from './components/Base';
-import { clamp } from './utils/utils';
-import { useSignalState } from './contexts/SignalContext';
-import { DAY_THEME, NIGHT_THEME } from './theme';
+import M2, { usePingPongState, useStatusState } from './contexts/M2'
+import ConnectionPopup from './components/ConnectionPopup'
+import SignalsGrid from './components/SignalsGrid'
+import SnifferPanel from './components/SnifferPanel'
+import { FavouritesProvider } from './contexts/FavouritesContext'
+import styled, { ThemeProvider } from 'styled-components'
+import { Grid } from 'styled-css-grid'
+import { Panel } from './components/Base'
+import { clamp } from './utils/utils'
+import { cms } from './utils/services'
+import { useSignalState } from './contexts/SignalContext'
+import { DAY_THEME, NIGHT_THEME } from './theme'
+import FavouritesGrid from './components/FavouritesGrid'
 
 /**
  * The App component uses the router to navigate to different panels in the app.
@@ -24,6 +25,7 @@ import { DAY_THEME, NIGHT_THEME } from './theme';
  */
 export default function App() {
 
+  const { freeze } = useContext(M2)
   const [ appIsOnline, appLatency ] = usePingPongState(1000, 4000)
   const [ m2IsOnline, m2Latency, m2Rate ] = useStatusState()
 
@@ -32,8 +34,10 @@ export default function App() {
   const drag = useDrag(({ down, movement: [dx] }) => {
     const { style } = panelRef.current
     let x = clamp(panelPos.current + dx, 0, 150)
+    freeze(true)
     if (!down) {
       x = panelPos.current = (x > 75) ? 150 : 0
+      freeze(false)
     }
     style.transform = `translate3d(${x}px, 0, 0)`
   }, {
@@ -43,6 +47,15 @@ export default function App() {
 
   const isSunUp = useSignalState('UI_isSunUp', true)
 
+  const [ grids, setGrids ] = useState([])
+  useEffect(() => {
+    const fetch = async () => {
+      const { data: { grids } } = await cms.get('/menu')
+      setGrids(grids)
+    }
+    fetch()
+  }, [])
+
   function handleNavMenuClick(e) {
     panelPos.current = 0
     panelRef.current.style.transform = `translate3d(0, 0, 0)`
@@ -51,17 +64,19 @@ export default function App() {
   return (
     <BrowserRouter>
       <NavMenu as={Grid} columns={1} gap={0} alignContent='start' onClick={handleNavMenuClick}>
-        <NavMenuItem as={NavLink} to='/' exact>
-          <Icon size='big' name='outline favorite' />
+        {grids.map(grid => (
+          <NavMenuItem as={NavLink} to={`/grids/${grid.name.toLowerCase()}`} key={grid.id} tiles={grid.tiles} exact>
+            <Icon size='big' name={grid.icon} />
+            {grid.name}
+          </NavMenuItem>
+        ))}
+        <NavMenuItem as={NavLink} to='/favourites'>
+          <Icon size='big' name='star' />
           Favourites
         </NavMenuItem>
         <NavMenuItem as={NavLink} to='/signals'>
           <Icon size='big' name='random' />
           Signals
-        </NavMenuItem>
-        <NavMenuItem as={NavLink} to='/sniffer'>
-          <Icon size='big' name='braille' />
-          Sniffer
         </NavMenuItem>
         <div style={{position: 'absolute', bottom: '0', padding: '20px'}}>
           <div>{m2Rate} msg/s</div>
@@ -74,13 +89,18 @@ export default function App() {
           <FavouritesProvider>
             <Switch>
               <Route exact path='/'>
+                <Redirect to={`/signals`} />
+              </Route>
+              {grids.map(g => (
+                <Route exact key={g.id} path={`/grids/${g.name.toLowerCase()}`}>
+                  <SignalsGrid grid={g} />
+                </Route>
+              ))}
+              <Route exact path='/favourites'>
                 <FavouritesGrid />
               </Route>
               <Route exact path='/signals/:categorySlug?/:messageSlug?'>
                 <SignalBrowser basePath='/signals' />
-              </Route>
-              <Route exact path='/sniffer'>
-                <SnifferPanel />
               </Route>
             </Switch>
           </FavouritesProvider>

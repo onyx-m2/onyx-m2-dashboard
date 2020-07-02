@@ -25,3 +25,10 @@ export const m2 = axios.create({
     'Authorization': m2Authorization
   }
 })
+
+/**
+ * CMS API
+ */
+export const cms = axios.create({
+  baseURL: 'https://johnmccalla.ngrok.io' //`${m2Scheme}://${m2Hostname}`,
+})

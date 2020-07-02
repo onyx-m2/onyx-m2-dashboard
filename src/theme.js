@@ -4,6 +4,7 @@
  */
 export const DAY_THEME = {
   name: 'day',
+  primary: 'rgb(62, 106, 225)',
   text: {
     dark: 'rgba(0, 0, 0, 0.85)',
     muted: 'rgba(0, 0, 0, 0.6)',
@@ -25,6 +26,7 @@ export const DAY_THEME = {
  */
 export const NIGHT_THEME = {
   name: 'night',
+  primary: 'rgb(62, 106, 225)',
   text: {
     dark: 'rgba(255, 255, 255, 0.9)',
     muted: 'rgba(255, 255, 255, 0.8)',

@@ -18,21 +18,26 @@ export const ScrollContainer = styled.div`
 `
 
 export const Tile = styled.div`
-  text-transform: uppercase;
+  text-transform: ${props => props.uppercase ? 'uppercase' : 'none'};
   overflow: auto;
   color: ${props => props.theme.text.dark};
   background: ${props => props.theme.background.component};
-  box-shadow: 0 2px 4px 0 rgba(34, 36, 38, 0.12), 0 2px 10px 0 rgba(34, 36, 38, 0.15);
+  box-shadow: ${props => props.selected ?
+    `0 0 0 4px ${props.theme.primary}` :
+    '0 2px 4px 0 rgba(34, 36, 38, 0.12), 0 2px 10px 0 rgba(34, 36, 38, 0.15)'
+  };
   border-radius: 10px;
   border: none;
   user-select: none;
 `
+
 export const DraggableTile = styled(Tile)`
   cursor: grab;
   &:active {
     cursor: move;
   }
 `
+
 export const Spinner = styled.div`
   position: absolute;
   top: 50%;

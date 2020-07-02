@@ -52,9 +52,9 @@ export default function SignalBrowser(props) {
           <MenuItem key={m.slug} slug={category.slug + '/' + m.slug} header={m.id} name={m.name} selected={m.slug === message.slug} />
         ))}
       </ScrollContainer>
-      <Tile>
+      <Tile uppercase>
         {signals.map(s => (
-          <Signal key={s.mnemonic} mnemonic={s.mnemonic} icon={isFavourite(s.mnemonic) ? 'olive star' : ''} onClick={() => toggleFavourite(s.mnemonic)} />
+          <Signal key={s.mnemonic} mnemonic={s.mnemonic} icon={isFavourite(s) ? 'olive star' : ''} onClick={() => toggleFavourite(s)} />
         ))}
       </Tile>
     </Grid>

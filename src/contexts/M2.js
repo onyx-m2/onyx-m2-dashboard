@@ -13,11 +13,20 @@ export function M2Provider(props) {
   const { dbc, children } = props
   const listeners = new EventTarget()
 
+  let frozen = false
+  const frozenEventQ = []
+
   useEffect(() => {
     function handleMessage(event) {
       try {
         const payload = JSON.parse(event.data)
-        listeners.dispatchEvent(new CustomEvent(payload.event, { detail: payload.data }))
+        const m2Event = new CustomEvent(payload.event, { detail: payload.data })
+        if (frozen) {
+          frozenEventQ.push(m2Event)
+        }
+        else {
+          listeners.dispatchEvent(m2Event)
+        }
       }
       catch {
         throw new Error(`Cannot parse message from M2: ${event.data}`)
@@ -31,8 +40,17 @@ export function M2Provider(props) {
     ws.send(JSON.stringify({ event, data }))
   }
 
+  function freeze(_frozen) {
+    frozen = _frozen
+    if (!frozen) {
+      while (frozenEventQ.length != 0) {
+        listeners.dispatchEvent(frozenEventQ.shift())
+      }
+    }
+  }
+
   return (
-    <M2.Provider value={{ ws, dbc, listeners, send }}>
+    <M2.Provider value={{ ws, dbc, listeners, send, freeze }}>
       {children}
     </M2.Provider>
   )

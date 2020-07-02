@@ -11,22 +11,22 @@ import styled from 'styled-components'
  * @component
  */
 export default function Signal(props) {
-  const { onClick, icon } = props
+  const { onClick, icon, mnemonic, caption } = props
   const decimals = props.decimals || 2
   const { dbc } = useContext(M2)
 
-  const value = useSignalState(props.mnemonic, '--')
+  const value = useSignalState(mnemonic, '--')
   let displayValue = value
   if (typeof(value) === 'number') {
     const factor = Math.pow(10, decimals)
     displayValue = Math.round(value * factor) / factor
   }
 
-  const definition = dbc.getSignal(props.mnemonic)
+  const definition = dbc.getSignal(mnemonic)
   let displayUnits = 'N/A'
-  let displayName = props.mnemonic
+  let displayName = caption || mnemonic
   if (definition) {
-    displayName = definition.name
+    displayName = caption || definition.name
     displayUnits = definition.units
     if (definition.values) {
       const definedValue = definition.values[value]
