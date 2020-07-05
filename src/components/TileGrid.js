@@ -33,9 +33,9 @@ export default function TileGrid(props) {
     }
     if (onTileMoved) {
       if (down) {
+        freeze(true)
         if (dx || dy) {
           setPlaceholdersVisible(true)
-          freeze(true)
         }
         style.zIndex = 1
         style.transform = `translate3d(${dx}px, ${dy}px, 0)`
