@@ -8,12 +8,13 @@ import * as serviceWorker from './serviceWorker'
 import { M2Provider } from './contexts/M2'
 import { SignalProvider } from './contexts/SignalContext'
 import DBC from './utils/DBC'
-import { m2 } from './utils/services'
+import { m2, cms } from './utils/services'
 import { Panel, Spinner } from './components/Base';
 import { DAY_THEME } from './theme';
+import { CMSProvider } from './contexts/CMS';
 
 /**
- * Load the DBC from the server.
+ * Load the DBC from the M2 server.
  */
 async function loadDBC(model) {
   while (true) {
@@ -29,17 +30,39 @@ async function loadDBC(model) {
 }
 
 /**
+ * Load the content from the CMS server.
+ */
+async function loadContent(model) {
+  while (true) {
+    try {
+      const [ { data: signals }, { data: menu } ] = await Promise.all([
+        cms.get('/signals'),
+        cms.get('/menu')
+      ])
+      return { signals, menu }
+    }
+    catch (e) {
+      console.warn(`Unable to load content (${e.message}), retrying in 1 second`)
+      await new Promise(r => setTimeout(r, 1000))
+    }
+  }
+}
+
+/**
  * Initialize the application, and render once all the data is loaded.
  */
 async function init() {
   const dbc = await loadDBC()
+  const { signals, menu } = await loadContent()
   ReactDOM.render(
     <React.StrictMode>
-      <M2Provider dbc={dbc}>
-        <SignalProvider>
-          <App />
-        </SignalProvider>
-      </M2Provider>
+      <CMSProvider signals={signals} menu={menu}>
+        <M2Provider dbc={dbc}>
+          <SignalProvider>
+            <App />
+          </SignalProvider>
+        </M2Provider>
+      </CMSProvider>
     </React.StrictMode>,
     document.getElementById('root')
   )
@@ -49,7 +72,7 @@ async function init() {
 init()
 ReactDOM.render(
   <Panel theme={DAY_THEME}>
-    <Spinner colour='201,0,0' image='/favicon.png' />
+    <Spinner colour='201,0,0' size='260' image='/favicon.png' />
   </Panel>,
   document.getElementById('root')
 )

@@ -1,16 +1,12 @@
 import React, { useContext, useState, useRef, useEffect, useMemo, forwardRef } from 'react'
 import Signal from './Signal'
-import { FavouritesContext } from '../contexts/FavouritesContext'
-import { Cell } from 'styled-css-grid'
 import TileGrid from './TileGrid'
 import M2 from '../contexts/M2'
-import { Link, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { load, save } from '../utils/persistance'
+import CMS from '../contexts/CMS'
 
 const SCHEMA_VERSION = 1
-const GRID_ROWS = 8
-const GRID_COLUMNS = 6
-const GRID_GAP = 20
 
 /**
  * Component that displays ...
@@ -18,10 +14,10 @@ const GRID_GAP = 20
  */
 export default function FavouritesGrid() {
   const history = useHistory();
-  const { favourites } = useContext(FavouritesContext)
+  const { favourites } = useContext(CMS)
   const { dbc } = useContext(M2)
 
-  const [positions, setPositions] = useState(load('favourites-positions', SCHEMA_VERSION) || {})
+  const [ positions, setPositions ] = useState(load('favourites-positions', SCHEMA_VERSION) || {})
   const [ tiles, setTiles ] = useState([])
   useEffect(() => {
     setTiles(favourites.map((f, i) => ({

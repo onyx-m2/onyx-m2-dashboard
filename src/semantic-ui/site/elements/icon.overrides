@@ -5,3 +5,8 @@
 i.icons .icon {
   left: 48%;
 }
+
+i.icon {
+  width: 1em;
+  margin: 8px;
+}

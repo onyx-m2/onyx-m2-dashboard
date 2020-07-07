@@ -4,7 +4,11 @@
  */
 export const DAY_THEME = {
   name: 'day',
+
+  // The primary color is the 'Tesla Blue' found on their website
   primary: 'rgb(62, 106, 225)',
+
+  // Various text colours for light theme
   text: {
     dark: 'rgba(0, 0, 0, 0.85)',
     muted: 'rgba(0, 0, 0, 0.6)',
@@ -15,9 +19,11 @@ export const DAY_THEME = {
     selected: 'rgba(0, 0, 0, 0.95)',
     disabled: 'rgba(0, 0, 0, 0.2)'
   },
+
   background: {
     panel: '#fafafa',
-    component: 'white'
+    component: 'white',
+    button: '#E0E1E2'
   }
 }
 
@@ -26,7 +32,11 @@ export const DAY_THEME = {
  */
 export const NIGHT_THEME = {
   name: 'night',
+
+  // The primary color is the 'Tesla Blue' found on their website
   primary: 'rgb(62, 106, 225)',
+
+  // Various text colours for light theme
   text: {
     dark: 'rgba(255, 255, 255, 0.9)',
     muted: 'rgba(255, 255, 255, 0.8)',
@@ -39,6 +49,7 @@ export const NIGHT_THEME = {
   },
   background: {
     panel: 'rgb(9, 9, 9)',
-    component: 'rgb(27, 28, 29)'
+    component: 'rgb(27, 28, 29)',
+    button: '#E0E1E2'
   }
 }

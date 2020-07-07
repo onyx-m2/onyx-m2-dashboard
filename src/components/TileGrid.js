@@ -2,7 +2,6 @@ import React, { useContext, useState, useRef, useEffect, useMemo, forwardRef, cr
 import PropTypes from 'prop-types'
 import { Grid, Cell } from 'styled-css-grid'
 import { useDrag } from 'react-use-gesture'
-import { Spinner } from './Base'
 import styled from 'styled-components'
 import { clamp } from '../utils/utils'
 import M2 from '../contexts/M2'
@@ -64,12 +63,6 @@ export default function TileGrid(props) {
     }
     return cells
   }, [])
-
-  if (Children.count(children) === 0) {
-    return (
-      <Spinner colour='201,0,0' image='/favicon.png' />
-    )
-  }
 
   return (
     <FullWidthGrid gap={`${GRID_GAP}px`} rows={GRID_ROWS} columns={GRID_COLUMNS}>

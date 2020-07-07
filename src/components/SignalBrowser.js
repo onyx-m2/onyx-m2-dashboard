@@ -4,10 +4,10 @@ import { Menu, Header } from 'semantic-ui-react'
 import Signal from './Signal'
 import { Link, useParams, useHistory } from 'react-router-dom'
 import M2 from '../contexts/M2'
-import { FavouritesContext } from '../contexts/FavouritesContext'
 import { Grid } from 'styled-css-grid'
 import { ScrollContainer, Tile } from './Base'
 import styled, { ThemeContext } from 'styled-components'
+import CMS from '../contexts/CMS'
 
 /**
  * Component that displays a fullscreen panel that allows browsing all the messages
@@ -17,7 +17,7 @@ import styled, { ThemeContext } from 'styled-components'
  */
 export default function SignalBrowser(props) {
   const { dbc } = useContext(M2)
-  const { isFavourite, toggleFavourite } = useContext(FavouritesContext)
+  const { isFavourite, toggleFavourite } = useContext(CMS)
   const history = useHistory()
   const { categorySlug, messageSlug } = useParams()
   let category = dbc.getCategory(categorySlug)

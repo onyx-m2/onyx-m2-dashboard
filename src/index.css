@@ -3,3 +3,8 @@ body ::-webkit-scrollbar {
   width: 0px;
   background: transparent;
 }
+
+/* Set all font families to the native Tesla's 'Gotham' fonts */
+*, button, input, optgroup, select, textarea {
+  font-family: 'Gotham Medium', sans-serif;
+}

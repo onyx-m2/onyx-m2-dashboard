@@ -3,6 +3,7 @@
   bottom: 40px;
   right: 40px;
   z-index: 10;
+  box-shadow: 3px 7px 10px 0 rgba(34,36,38,0.52);
 }
 
 .ui.message.ConnectionPopup > .icons {

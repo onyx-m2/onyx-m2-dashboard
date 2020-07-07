@@ -3,20 +3,19 @@ import { BrowserRouter, Switch, Route, Link, Redirect, NavLink } from 'react-rou
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
 import { useDrag } from 'react-use-gesture'
 import SignalBrowser from './components/SignalBrowser'
-import { Icon } from 'semantic-ui-react'
+import { Icon, Button as SemanticButton } from 'semantic-ui-react'
 import M2, { usePingPongState, useStatusState } from './contexts/M2'
 import ConnectionPopup from './components/ConnectionPopup'
 import SignalsGrid from './components/SignalsGrid'
-import SnifferPanel from './components/SnifferPanel'
-import { FavouritesProvider } from './contexts/FavouritesContext'
 import styled, { ThemeProvider } from 'styled-components'
 import { Grid } from 'styled-css-grid'
-import { Panel } from './components/Base'
+import { Panel, Button } from './components/Base'
 import { clamp } from './utils/utils'
 import { cms } from './utils/services'
 import { useSignalState } from './contexts/SignalContext'
 import { DAY_THEME, NIGHT_THEME } from './theme'
 import FavouritesGrid from './components/FavouritesGrid'
+import CMS from './contexts/CMS'
 
 /**
  * The App component uses the router to navigate to different panels in the app.
@@ -25,9 +24,11 @@ import FavouritesGrid from './components/FavouritesGrid'
  */
 export default function App() {
 
+  const { grids, modified, saving, saveModified } = useContext(CMS)
   const { freeze } = useContext(M2)
   const [ appIsOnline, appLatency ] = usePingPongState(1000, 4000)
   const [ m2IsOnline, m2Latency, m2Rate ] = useStatusState()
+  const isSunUp = useSignalState('UI_isSunUp', true)
 
   const panelRef = useRef(null)
   const panelPos = useRef(0)
@@ -44,17 +45,6 @@ export default function App() {
     axis: 'x',
     rubberband: true
   })
-
-  const isSunUp = useSignalState('UI_isSunUp', true)
-
-  const [ grids, setGrids ] = useState([])
-  useEffect(() => {
-    const fetch = async () => {
-      const { data: { grids } } = await cms.get('/menu')
-      setGrids(grids)
-    }
-    fetch()
-  }, [])
 
   function handleNavMenuClick(e) {
     panelPos.current = 0
@@ -80,30 +70,32 @@ export default function App() {
         </NavMenuItem>
         <div style={{position: 'absolute', bottom: '0', padding: '20px'}}>
           <div>{m2Rate} msg/s</div>
-          <div>App: {appLatency} ms</div>
-          <div>M2: {m2Latency} ms</div>
+          <div>{appLatency}ms / {m2Latency}ms</div>
         </div>
       </NavMenu>
       <ThemeProvider theme={isSunUp ? DAY_THEME : NIGHT_THEME}>
         <Panel {...drag()} ref={panelRef}>
-          <FavouritesProvider>
-            <Switch>
-              <Route exact path='/'>
-                <Redirect to={`/signals`} />
+          {modified &&
+            <SyncButton primary raised rounded onClick={() => saveModified()}>
+              <Icon loading={saving} name='sync' size='big' />
+            </SyncButton>
+          }
+          <Switch>
+            <Route exact path='/'>
+              <Redirect to={`/signals`} />
+            </Route>
+            {grids.map(g => (
+              <Route exact key={g.id} path={`/grids/${g.slug}`}>
+                <SignalsGrid grid={g} />
               </Route>
-              {grids.map(g => (
-                <Route exact key={g.id} path={`/grids/${g.name.toLowerCase()}`}>
-                  <SignalsGrid grid={g} />
-                </Route>
-              ))}
-              <Route exact path='/favourites'>
-                <FavouritesGrid />
-              </Route>
-              <Route exact path='/signals/:categorySlug?/:messageSlug?'>
-                <SignalBrowser basePath='/signals' />
-              </Route>
-            </Switch>
-          </FavouritesProvider>
+            ))}
+            <Route exact path='/favourites'>
+              <FavouritesGrid />
+            </Route>
+            <Route exact path='/signals/:categorySlug?/:messageSlug?'>
+              <SignalBrowser basePath='/signals' />
+            </Route>
+          </Switch>
         </Panel>
       </ThemeProvider>
       <ConnectionPopup appStatus={appIsOnline} m2Status={m2IsOnline} />
@@ -138,4 +130,10 @@ const NavMenuItem = styled.div`
   }
   min-width: 6em;
   padding: 20px;
+`
+
+const SyncButton = styled(Button)`
+  position: absolute;
+  z-index: 100;
+  right : 20px;
 `
