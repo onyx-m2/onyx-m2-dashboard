@@ -30,5 +30,5 @@ export const m2 = axios.create({
  * CMS API
  */
 export const cms = axios.create({
-  baseURL: 'https://johnmccalla.ngrok.io' //`${m2Scheme}://${m2Hostname}`,
+  baseURL: `${m2Scheme}://${m2Hostname}/cms`,
 })
