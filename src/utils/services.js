@@ -6,7 +6,6 @@ const m2Authorization = process.env.REACT_APP_M2_AUTHORIZATION
 const m2Secure = process.env.REACT_APP_M2_SECURE === 'true'
 const m2Scheme = m2Secure ? 'https' : 'http'
 const m2WsScheme = m2Secure ? 'wss' : 'ws'
-const teslaAccess = process.env.REACT_APP_TESLA_ACCESS_TOKEN
 
 /**
  * M2 websocket
@@ -30,5 +29,5 @@ export const m2 = axios.create({
  * CMS API
  */
 export const cms = axios.create({
-  baseURL: `${m2Scheme}://${m2Hostname}/cms`,
+  baseURL: `${m2Scheme}://cms.${m2Hostname}`,
 })
