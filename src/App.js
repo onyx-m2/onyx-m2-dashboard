@@ -26,7 +26,7 @@ export default function App() {
 
   const { grids, modified, saving, saveModified } = useContext(CMS)
   const { freeze } = useContext(M2)
-  const [ appIsOnline, appLatency ] = usePingPongState(1000, 4000)
+  const [ appIsOnline, appLatency ] = usePingPongState(1000, 2000)
   const [ m2IsOnline, m2Latency, m2Rate ] = useStatusState()
   const isSunUp = useSignalState('UI_isSunUp', true)
 
