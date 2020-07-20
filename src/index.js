@@ -8,10 +8,11 @@ import * as serviceWorker from './serviceWorker'
 import { M2Provider } from './contexts/M2'
 import { SignalProvider } from './contexts/SignalContext'
 import DBC from './utils/DBC'
-import { m2, cms } from './utils/services'
+import { m2, cms, configure } from './utils/services'
 import { Panel, Spinner } from './components/Base';
 import { DAY_THEME } from './theme';
 import { CMSProvider } from './contexts/CMS';
+import { load } from './utils/persistance';
 
 /**
  * Load the DBC from the M2 server.
@@ -52,6 +53,15 @@ async function loadContent(model) {
  * Initialize the application, and render once all the data is loaded.
  */
 async function init() {
+
+  // Render a loading screen until the actual initialization is done
+  ReactDOM.render(
+    <Panel theme={DAY_THEME}>
+      <Spinner colour='201,0,0' size='260' image='/favicon.png' />
+    </Panel>,
+    document.getElementById('root')
+  )
+
   const dbc = await loadDBC()
   const { signals, menu } = await loadContent()
   ReactDOM.render(
@@ -68,14 +78,18 @@ async function init() {
   )
 }
 
-// Render a loading screen until the actual initialization is done
-init()
-ReactDOM.render(
-  <Panel theme={DAY_THEME}>
-    <Spinner colour='201,0,0' size='260' image='/favicon.png' />
-  </Panel>,
-  document.getElementById('root')
-)
+// Check for initial configuration (super lazy implementation - but better than nothing?)
+const config = load('config', 1)
+if (config) {
+  configure(config)
+  init()
+}
+else {
+  ReactDOM.render(
+    <Configuration />,
+    document.getElementById('root')
+  )
+}
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
