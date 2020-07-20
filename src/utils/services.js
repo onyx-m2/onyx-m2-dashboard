@@ -19,7 +19,7 @@ export var m2
  */
 export var cms
 
-export function configure(config) {
+export async function configure(config) {
   const { server, pin, secure } = config
   const httpProtocol = secure ? 'https' : 'http'
   const wsProtocol = secure ? 'wss' : 'ws'
@@ -36,7 +36,21 @@ export function configure(config) {
     }
   })
 
-  cms = axios.create({
-    baseURL: `${httpProtocol}://cms.${server}`,
-  })
+  const cmsServer = config.cms.server || `cms.${server}`
+  const cmsUrl = `${httpProtocol}://${cmsServer}`
+  if (config.cms.username && config.cms.password) {
+    const { data: { jwt } } = await axios.post(`${cmsUrl}/auth/local`, {
+      identifier: config.cms.username,
+      password: config.cms.password
+    })
+    cms = axios.create({
+      baseURL: cmsUrl,
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      }
+    })
+  }
+  else {
+    cms = axios.create({ baseURL: cmsUrl })
+  }
 }

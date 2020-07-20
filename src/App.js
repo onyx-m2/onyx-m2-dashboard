@@ -95,9 +95,10 @@ export default function App() {
             <Route exact path='/signals/:categorySlug?/:messageSlug?'>
               <SignalBrowser basePath='/signals' />
             </Route>
-            <Route exact path='/configuration'>
-              <Configuration />
-            </Route>
+            <Route exact path='/configuration' component={() => {
+              window.location.href = '/configuration'
+              return null
+            }}/>
           </Switch>
         </Panel>
       </ThemeProvider>

@@ -14,6 +14,7 @@ import { DAY_THEME } from './theme';
 import { CMSProvider } from './contexts/CMS';
 import { load } from './utils/persistance';
 import Configuration from './components/Configuration';
+import { ThemeProvider } from 'styled-components';
 
 /**
  * Load the DBC from the M2 server.
@@ -79,18 +80,26 @@ async function init() {
   )
 }
 
-// Check for initial configuration (super lazy implementation - but better than nothing?)
-const config = load('config', 1)
-if (config) {
-  configure(config)
-  init()
+// Check for configuration requests, or first time run (super lazy implementation - but better than nothing?)
+async function checkConfig() {
+  const config = load('config', 1)
+  if (config && window.location.pathname !== '/configuration') {
+    await configure(config)
+    init()
+  }
+  else {
+    ReactDOM.render(
+      <ThemeProvider theme={DAY_THEME}>
+        <Panel>
+          <Configuration theme={DAY_THEME} />
+        </Panel>
+      </ThemeProvider>,
+      document.getElementById('root')
+    )
+  }
 }
-else {
-  ReactDOM.render(
-    <Configuration />,
-    document.getElementById('root')
-  )
-}
+
+checkConfig();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
