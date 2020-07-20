@@ -13,6 +13,7 @@ import { Panel, Spinner } from './components/Base';
 import { DAY_THEME } from './theme';
 import { CMSProvider } from './contexts/CMS';
 import { load } from './utils/persistance';
+import Configuration from './components/Configuration';
 
 /**
  * Load the DBC from the M2 server.
