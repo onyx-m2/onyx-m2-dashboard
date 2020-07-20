@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect, useContext } from 'react'
-import { BrowserRouter, Switch, Route, Link, Redirect, NavLink } from 'react-router-dom'
+import React, { useRef, useContext } from 'react'
+import { BrowserRouter, Switch, Route, Redirect, NavLink } from 'react-router-dom'
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
 import { useDrag } from 'react-use-gesture'
 import SignalBrowser from './components/SignalBrowser'
@@ -11,11 +11,11 @@ import styled, { ThemeProvider } from 'styled-components'
 import { Grid } from 'styled-css-grid'
 import { Panel, Button } from './components/Base'
 import { clamp } from './utils/utils'
-import { cms } from './utils/services'
 import { useSignalState } from './contexts/SignalContext'
 import { DAY_THEME, NIGHT_THEME } from './theme'
 import FavouritesGrid from './components/FavouritesGrid'
 import CMS from './contexts/CMS'
+import Configuration from './components/Configuration'
 
 /**
  * The App component uses the router to navigate to different panels in the app.
@@ -94,6 +94,9 @@ export default function App() {
             </Route>
             <Route exact path='/signals/:categorySlug?/:messageSlug?'>
               <SignalBrowser basePath='/signals' />
+            </Route>
+            <Route exact path='/configuration'>
+              <Configuration />
             </Route>
           </Switch>
         </Panel>
