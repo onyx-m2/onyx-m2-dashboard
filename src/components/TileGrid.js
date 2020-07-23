@@ -6,8 +6,8 @@ import styled from 'styled-components'
 import { clamp } from '../utils/utils'
 import M2 from '../contexts/M2'
 
-const GRID_ROWS = 8
-const GRID_COLUMNS = 6
+const DEFAULT_ROWS = 8
+const DEFAULT_COLUMNS = 6
 const GRID_GAP = 20
 
 /**
@@ -16,7 +16,7 @@ const GRID_GAP = 20
  */
 export default function TileGrid(props) {
   const { freeze } = useContext(M2)
-  const { children, onTileMoved, onTileTapped } = props
+  const { rows, columns, children, onTileMoved, onTileTapped } = props
 
   const placeholderRef = useRef(null)
   const tilesRef = useRef([])
@@ -56,8 +56,8 @@ export default function TileGrid(props) {
 
   const gridCells = useMemo(() => {
     const cells = []
-    for (let row = 1; row <= GRID_ROWS; row++) {
-      for (let col = 1; col <= GRID_COLUMNS; col++) {
+    for (let row = 1; row <= rows; row++) {
+      for (let col = 1; col <= columns; col++) {
         cells.push({row, col})
       }
     }
@@ -65,7 +65,7 @@ export default function TileGrid(props) {
   }, [])
 
   return (
-    <FullWidthGrid gap={`${GRID_GAP}px`} rows={GRID_ROWS} columns={GRID_COLUMNS}>
+    <FullWidthGrid gap={`${GRID_GAP}px`} rows={rows} columns={columns}>
       {gridCells.map(p => (
         <PlaceholderCell
           key={`${p.row}x${p.col}`}
@@ -86,6 +86,11 @@ export default function TileGrid(props) {
       }))}
     </FullWidthGrid>
   )
+}
+
+TileGrid.defaultProps = {
+  rows: DEFAULT_ROWS,
+  columns: DEFAULT_COLUMNS
 }
 
 TileGrid.Tile = styled.div`
