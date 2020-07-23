@@ -7,12 +7,12 @@ import { save, load } from '../utils/persistance'
  * @component
  */
 export default function Configuration() {
-  const [ server, setServer ] = useState('')
-  const [ pin, setPin ] = useState('')
+  const [ server, setServer ] = useState(process.env.REACT_APP_CONFIG_SERVER || '')
+  const [ pin, setPin ] = useState(process.env.REACT_APP_CONFIG_PIN || '')
   const [ secure, setSecure ] = useState(true)
   const [ cmsServer, setCmsServer ] = useState('cms.onyx-m2.net')
-  const [ cmsUsername, setCmsUsername ] = useState('')
-  const [ cmsPassword, setCmsPassword ] = useState('')
+  const [ cmsUsername, setCmsUsername ] = useState(process.env.REACT_APP_CONFIG_CMS_USERNAME || '')
+  const [ cmsPassword, setCmsPassword ] = useState(process.env.REACT_APP_CONFIG_CMS_PASSWORD || '')
 
   useEffect(() => {
     const config = load('config', 1)
