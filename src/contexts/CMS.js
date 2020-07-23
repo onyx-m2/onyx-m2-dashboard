@@ -20,6 +20,7 @@ export function CMSProvider(props) {
   const [ saving, setSaving ] = useState(false)
 
   async function toggleFavourite(dbcSignal) {
+    let updatedSignals
     let signal = signals.find(s => s.mnemonic === dbcSignal.mnemonic)
     if (!signal) {
       signal = {
@@ -30,12 +31,12 @@ export function CMSProvider(props) {
         favourite: true,
       }
       if (dbcSignal.values) {
-        signal.values = Object.keys(dbcSignal.values).map(i => ({ value: i, label: signal.values[i]}))
+        signal.values = Object.keys(dbcSignal.values).map(i => ({ value: i, label: dbcSignal.values[i]}))
       }
-      setSignals(signals.concat(signal))
+      updatedSignals = signals.concat(signal)
     }
     else {
-      setSignals(signals.map(s => {
+      updatedSignals = signals.map(s => {
         if (s === signal) {
           return {
             ...signal,
@@ -44,9 +45,10 @@ export function CMSProvider(props) {
           }
         }
         return s
-      }))
+      })
     }
-    setFavourites(signals.filter(s => s.favourite))
+    setSignals(updatedSignals)
+    setFavourites(updatedSignals.filter(s => s.favourite))
     setModified(true)
   }
 
