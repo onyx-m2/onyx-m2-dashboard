@@ -8,3 +8,8 @@ body ::-webkit-scrollbar {
 *, button, input, optgroup, select, textarea {
   font-family: 'Gotham Medium', sans-serif;
 }
+
+/* Disable the ugly gray highlight when you tap anything in the UI */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
