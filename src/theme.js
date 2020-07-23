@@ -19,12 +19,13 @@ export const DAY_THEME = {
     selected: 'rgba(0, 0, 0, 0.95)',
     disabled: 'rgba(0, 0, 0, 0.2)'
   },
-
   background: {
     panel: '#fafafa',
     component: 'white',
-    button: '#E0E1E2'
-  }
+    button: '#E0E1E2',
+    selected: 'rgba(0, 0, 0, 0.05)'
+  },
+  divider: 'rgba(34, 36, 38, 0.1)'
 }
 
 /**
@@ -50,6 +51,8 @@ export const NIGHT_THEME = {
   background: {
     panel: 'rgb(9, 9, 9)',
     component: 'rgb(27, 28, 29)',
-    button: '#E0E1E2'
-  }
+    button: '#E0E1E2',
+    selected: 'rgba(255, 255, 255, 0.15);'
+  },
+  divider: 'rgba(255, 255, 255, 0.08)'
 }
