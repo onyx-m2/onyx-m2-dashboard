@@ -32,18 +32,21 @@ export default function App() {
 
   const panelRef = useRef(null)
   const panelPos = useRef(0)
-  const drag = useDrag(({ down, movement: [dx] }) => {
+  const drag = useDrag(({ event, tap, down, movement: [dx] }) => {
     const { style } = panelRef.current
     let x = clamp(panelPos.current + dx, 0, 150)
     freeze(true)
     if (!down) {
       x = panelPos.current = (x > 75) ? 150 : 0
       freeze(false)
+      if (!tap) {
+        event.stopPropagation()
+      }
     }
     style.transform = `translate3d(${x}px, 0, 0)`
   }, {
     axis: 'x',
-    rubberband: true
+    filterTaps: true,
   })
 
   function handleNavMenuClick(e) {

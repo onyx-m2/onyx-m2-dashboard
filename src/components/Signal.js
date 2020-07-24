@@ -1,7 +1,7 @@
-import React, { useContext } from 'react'
+import React, { useContext, Children, cloneElement } from 'react'
 import PropTypes from 'prop-types'
 import M2 from '../contexts/M2'
-import { useSignalState } from '../contexts/SignalContext'
+import { useSignalState, useSignalDisplay } from '../contexts/SignalContext'
 import { Icon } from 'semantic-ui-react'
 import { Grid } from 'styled-css-grid'
 import styled from 'styled-components'
@@ -10,54 +10,99 @@ import styled from 'styled-components'
  * Component displaying a realtime canbus signal.
  * @component
  */
-export default function Signal(props) {
-  const { onClick, icon, mnemonic, caption } = props
-  const decimals = props.decimals || 2
-  const { dbc } = useContext(M2)
-
-  const value = useSignalState(mnemonic, '--')
-  let displayValue = value
-  if (typeof(value) === 'number') {
-    const factor = Math.pow(10, decimals)
-    displayValue = Math.round(value * factor) / factor
-  }
-
-  const definition = dbc.getSignal(mnemonic)
-  let displayUnits = 'N/A'
-  let displayName = caption || mnemonic
-  if (definition) {
-    displayName = caption || definition.name
-    displayUnits = definition.units
-    if (definition.values) {
-      const definedValue = definition.values[value]
-      if (definedValue) {
-        displayUnits = definedValue.replace(/_/g, ' ')
-      }
-    }
-  }
-
+export function SignalSlab(props) {
+  const { icon, decimals, mnemonic, caption } = props
+  const { name, value, units } = useSignalDisplay(mnemonic, decimals)
   return (
-    <SignalGrid gap='10px' rows={1} columns={'2fr 1fr'} onClick={onClick}>
-      <div>{icon && <Icon name={icon} />}{displayName}</div>
+    <SignalGrid gap='10px' rows={1} columns={'2fr 1fr'} {...props}>
+      <div>{icon && <Icon name={icon} />}{caption || name}</div>
       <Data>
-        <Value>{displayValue}</Value>
-        <Units>{displayUnits}</Units>
+        <Value>{value}</Value>
+        <Units>{units}</Units>
       </Data>
     </SignalGrid>
   )
 }
 
-Signal.propTypes = {
-  /**
-   * Number of decimal places to display
-   */
-  decimals: PropTypes.number,
-
-  /**
-   * Mnemonic of the signal to display
-   */
-  mnemonic: PropTypes.string.isRequired
+export function SignalHero(props) {
+  const { decimals, mnemonic } = props
+  const { name, value, units } = useSignalDisplay(mnemonic, decimals)
+  return (
+    <CenteredGrid alignItems='center' rows={'5fr 1fr'} columns={1} {...props}>
+      <BigValue>65</BigValue>
+      <Units>{units}</Units>
+    </CenteredGrid>
+  )
 }
+
+const CenteredGrid = styled(Grid)`
+  align-items: center;
+  justify-items: center;
+`
+
+const BigData = styled.div`
+  text-align: center;
+  margin-top: 6px;
+
+`
+
+const BigValue = styled.div`
+  font-size: 5em;
+`
+
+// export default function Signal(props) {
+//   const { icon, mnemonic, caption, showName, showUnits, } = props
+//   const decimals = props.decimals || 2
+//   const { dbc } = useContext(M2)
+
+//   const value = useSignalState(mnemonic, '--')
+//   let displayValue = value
+//   if (typeof(value) === 'number') {
+//     const factor = Math.pow(10, decimals)
+//     displayValue = Math.round(value * factor) / factor
+//   }
+
+//   const definition = dbc.getSignal(mnemonic)
+//   let displayUnits = 'N/A'
+//   let displayName = caption || mnemonic
+//   if (definition) {
+//     displayName = caption || definition.name
+//     displayUnits = definition.units
+//     if (definition.values) {
+//       const definedValue = definition.values[value]
+//       if (definedValue) {
+//         displayUnits = definedValue.replace(/_/g, ' ')
+//       }
+//     }
+//   }
+
+//   return (
+//     <SignalGrid gap='10px' rows={1} columns={'2fr 1fr'} {...props} >
+//       <div>{icon && <Icon name={icon} />}{(caption || showName) && displayName}</div>
+//       <Data>
+//         <Value>{displayValue}</Value>
+//         {showUnits && <Units>{displayUnits}</Units>}
+//       </Data>
+//     </SignalGrid>
+//   )
+// }
+
+// Signal.defaultProps = {
+//   showName: true,
+//   showUnits: true
+// }
+
+// Signal.propTypes = {
+//   /**
+//    * Number of decimal places to display
+//    */
+//   decimals: PropTypes.number,
+
+//   /**
+//    * Mnemonic of the signal to display
+//    */
+//   mnemonic: PropTypes.string.isRequired
+// }
 
 const SignalGrid = styled(Grid)`
   margin: 20px;

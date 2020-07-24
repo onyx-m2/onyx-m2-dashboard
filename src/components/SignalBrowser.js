@@ -1,8 +1,7 @@
 import React, { useContext } from 'react'
 import PropTypes from 'prop-types'
-import { Menu, Header } from 'semantic-ui-react'
-import Signal from './Signal'
-import { Link, useParams, useHistory } from 'react-router-dom'
+import { SignalSlab } from './Signal'
+import { useParams, useHistory } from 'react-router-dom'
 import M2 from '../contexts/M2'
 import { Grid } from 'styled-css-grid'
 import { ScrollContainer, Tile } from './Base'
@@ -37,26 +36,44 @@ export default function SignalBrowser(props) {
 
   const theme = useContext(ThemeContext)
 
+  function onCategorySelected(slug) {
+    if (slug !== category.slug) {
+      history.push(`${props.basePath}/${slug}`)
+    }
+  }
+
+  function onMessageSelected(slug) {
+    if (slug !== message.slug) {
+      history.push(`${props.basePath}/${category.slug}/${slug}`)
+    }
+  }
+
   const categories = dbc.getCategories()
   let messages = dbc.getCategoryMessages(categorySlug)
   let signals = dbc.getMessageSignals(message.mnemonic)
   return (
     <Grid gap='20px' row={1} columns={3}>
-      <ScrollContainer as={Menu} fluid vertical inverted={theme.name === 'night'}>
+      <ScrollContainer as={Tile}>
         {categories.map(c => (
-          <MenuItem key={c.slug} slug={c.slug} header={c.slug} name={c.name} selected={c.slug === category.slug} />
+            <ListItem uppercase key={c.slug} selected={c.slug === category.slug} onMouseUp={() => onCategorySelected(c.slug)}>
+              <ListItem.Header>{c.slug}</ListItem.Header>
+              {c.name}
+            </ListItem>
         ))}
       </ScrollContainer>
-      <ScrollContainer as={Menu} fluid vertical inverted={theme.name === 'night'}>
+      <ScrollContainer as={Tile}>
         {messages.map(m => (
-          <MenuItem key={m.slug} slug={category.slug + '/' + m.slug} header={m.id} name={m.name} selected={m.slug === message.slug} />
+          <ListItem uppercase key={m.slug} selected={m.slug === message.slug} onMouseUp={(e) => onMessageSelected(m.slug)}>
+            <ListItem.Header>{m.id}</ListItem.Header>
+            {m.name}
+          </ListItem>
         ))}
       </ScrollContainer>
-      <Tile uppercase>
+      <ScrollContainer as={Tile} uppercase>
         {signals.map(s => (
-          <Signal key={s.mnemonic} mnemonic={s.mnemonic} icon={isFavourite(s) ? 'olive star' : ''} onClick={() => toggleFavourite(s)} />
+          <SignalSlab key={s.mnemonic} mnemonic={s.mnemonic} icon={isFavourite(s) ? 'olive star' : ''} onMouseUp={() => toggleFavourite(s)} />
         ))}
-      </Tile>
+      </ScrollContainer>
     </Grid>
   )
 }
@@ -68,16 +85,32 @@ SignalBrowser.propTypes = {
   basePath: PropTypes.string.isRequired
 }
 
-function MenuItem(props) {
-  const { slug, header, name, selected } = props
-  return (
-    <Menu.Item as={UpperCaseLink} to={`../${slug}`} active={selected}>
-      <Header size='tiny' as='h4' color='grey' content={header} />
-      {name}
-    </Menu.Item>
-  )
-}
+const ListItem = styled.div`
+  position: relative;
+  text-transform: ${props => props.uppercase ? 'uppercase' : 'none'};
 
-const UpperCaseLink = styled(Link)`
-  text-transform: uppercase !important;
+  background: ${props => props.selected ? props.theme.background.selected : 'none'};
+  font-weight: ${props => props.selected ? 700 : 400};
+
+  cursor: pointer;
+  padding: 18px;
+
+  &:before {
+    position: absolute;
+    content: '';
+    top: 0%;
+    left: 0px;
+    width: 100%;
+    height: 1px;
+    background: ${props => props.theme.divider};
+  }
+
+  &:first-child:before {
+    display: none;
+  }
+`
+
+ListItem.Header = styled.h4`
+  color: grey;
+  font-size: 12px;
 `

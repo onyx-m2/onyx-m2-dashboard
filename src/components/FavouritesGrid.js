@@ -60,7 +60,7 @@ export default function FavouritesGrid() {
   return (
     <TileGrid onTileMoved={tileMoved} onTileTapped={tileTapped}>
       {tiles.map((f, i) => (
-        <TileGrid.Tile key={f.id} left={f.left} top={f.top} >
+        <TileGrid.Tile uppercase key={f.id} left={f.left} top={f.top} >
           <Signal caption={f.name} mnemonic={f.mnemonic} />
         </TileGrid.Tile>
       ))}

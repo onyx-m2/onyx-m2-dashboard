@@ -94,3 +94,31 @@ export function useSignalState(mnemonic, initialValue) {
   }, [mnemonic])
   return value
 }
+
+export function useSignalDisplay(mnemonic, decimals) {
+  decimals = decimals || 2
+
+  const { dbc } = useContext(M2)
+  const signalValue = useSignalState(mnemonic, '--')
+
+  let value = signalValue
+  if (typeof(value) === 'number') {
+    const factor = Math.pow(10, decimals)
+    value = Math.round(value * factor) / factor
+  }
+
+  const definition = dbc.getSignal(mnemonic)
+  let units = 'N/A'
+  let name = mnemonic
+  if (definition) {
+    name = definition.name
+    units = definition.units
+    if (definition.values) {
+      const definedValue = definition.values[value]
+      if (definedValue) {
+        units = definedValue.replace(/_/g, ' ')
+      }
+    }
+  }
+  return { name, value, units }
+}
