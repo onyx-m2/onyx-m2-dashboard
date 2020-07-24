@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef, useEffect, useMemo, forwardRef } from 'react'
-import Signal from './Signal'
+import { SignalSlab } from './Signal'
 import TileGrid from './TileGrid'
 import M2 from '../contexts/M2'
 import { useHistory } from 'react-router-dom'
@@ -61,7 +61,7 @@ export default function FavouritesGrid() {
     <TileGrid onTileMoved={tileMoved} onTileTapped={tileTapped}>
       {tiles.map((f, i) => (
         <TileGrid.Tile uppercase key={f.id} left={f.left} top={f.top} >
-          <Signal caption={f.name} mnemonic={f.mnemonic} />
+          <SignalSlab caption={f.name} mnemonic={f.mnemonic} />
         </TileGrid.Tile>
       ))}
     </TileGrid>
