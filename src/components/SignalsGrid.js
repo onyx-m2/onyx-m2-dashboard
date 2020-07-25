@@ -1,9 +1,14 @@
 import React, { useContext, useState, useRef, useEffect, useMemo, forwardRef } from 'react'
 import PropTypes from 'prop-types'
-import { SignalSlab, SignalHero } from './Signal'
+import { SignalPill, SignalSlab, SignalHero } from './Signal'
 import TileGrid from './TileGrid'
 import CMS from '../contexts/CMS'
 
+const sizes = {
+  pill: {width: 1, height: 1},
+  slab: {width: 2, height: 1},
+  hero: {width: 2, height: 2}
+}
 
 /**
  * Component that displays ...
@@ -18,10 +23,24 @@ export default function SignalsGrid(props) {
   }
 
   return (
-    <TileGrid onTileMoved={(id, left, top) => moveGridTile(grid, id, left, top)} columns={5}>
+    <TileGrid onTileMoved={(id, left, top) => moveGridTile(grid, id, left, top)} rows={grid.rows} columns={grid.columns}>
       {signalTiles().map((t, i) => (
-        <TileGrid.Tile key={t.id} left={t.tile.left} top={t.tile.top} width={t.tile.width} height={t.tile.height}>
-          <SignalSlab caption={t.tile.caption} mnemonic={t.signal.mnemonic} showName={t.showSignalName} showUnits={t.showSignalUnits} />
+        <TileGrid.Tile
+          key={t.id}
+          left={t.tile.left}
+          top={t.tile.top}
+          width={sizes[t.tile.displayType].width}
+          height={sizes[t.tile.displayType].height}>
+          {(() => {
+            switch (t.tile.displayType) {
+              case 'pill':
+                return <SignalPill mnemonic={t.signal.mnemonic} />
+              case 'slab':
+                return <SignalSlab caption={t.tile.caption} mnemonic={t.signal.mnemonic} showName={t.showSignalName} showUnits={t.showSignalUnits} />
+              case 'hero':
+                return <SignalHero caption={t.tile.caption} mnemonic={t.signal.mnemonic} showName={t.showSignalName} showUnits={t.showSignalUnits} />
+            }
+          })()}
         </TileGrid.Tile>
       ))}
     </TileGrid>

@@ -24,12 +24,27 @@ export function SignalSlab(props) {
   )
 }
 
+/**
+ * Component displaying a realtime canbus signal.
+ * @component
+ */
+export function SignalPill(props) {
+  const { icon, decimals, mnemonic } = props
+  const { value, units } = useSignalDisplay(mnemonic, decimals)
+  return (
+    <CenteredGrid alignItems='center' rows={'2fr 1fr'} columns={1} {...props}>
+      <Value>{value}</Value>
+      <Units>{units}</Units>
+    </CenteredGrid>
+  )
+}
+
 export function SignalHero(props) {
   const { decimals, mnemonic } = props
   const { name, value, units } = useSignalDisplay(mnemonic, decimals)
   return (
     <CenteredGrid alignItems='center' rows={'5fr 1fr'} columns={1} {...props}>
-      <BigValue>65</BigValue>
+      <BigValue>{value}</BigValue>
       <Units>{units}</Units>
     </CenteredGrid>
   )

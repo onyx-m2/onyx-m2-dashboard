@@ -95,7 +95,7 @@ TileGrid.defaultProps = {
 
 TileGrid.Tile = styled.div`
   text-transform: ${props => props.uppercase ? 'uppercase' : 'none'};
-  overflow: auto;
+  overflow: hidden;
   color: ${props => props.theme.text.dark};
   background: ${props => props.theme.background.component};
   box-shadow: ${props => props.selected ?
