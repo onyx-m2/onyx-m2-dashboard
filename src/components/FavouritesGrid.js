@@ -6,7 +6,7 @@ import { useHistory } from 'react-router-dom'
 import { load, save } from '../utils/persistance'
 import CMS from '../contexts/CMS'
 
-const SCHEMA_VERSION = 1
+const SCHEMA_VERSION = 2
 
 /**
  * Component that displays ...
@@ -21,15 +21,15 @@ export default function FavouritesGrid() {
   const [ tiles, setTiles ] = useState([])
   useEffect(() => {
     setTiles(favourites.map((f, i) => ({
-      left: positions[f.id]?.left || 1,
-      top: positions[f.id]?.top || 1,
+      left: positions[f.mnemonic]?.left || 1,
+      top: positions[f.mnemonic]?.top || 1,
       ...f
     })))
   }, [favourites])
 
   function tileMoved(key, left, top) {
     const updatedTiles = tiles.map(t => {
-      if (t.id == key) {
+      if (t.mnemonic == key) {
         return { ...t, left, top }
       }
       return t
@@ -38,7 +38,7 @@ export default function FavouritesGrid() {
 
     let updatedPositions = {}
     updatedTiles.forEach(t => {
-      updatedPositions[t.id] = {
+      updatedPositions[t.mnemonic] = {
         left: t.left,
         top: t.top
       }
@@ -48,7 +48,7 @@ export default function FavouritesGrid() {
   }
 
   function tileTapped(key) {
-    const tile = tiles.find(t => t.id == key)
+    const tile = tiles.find(t => t.mnemonic == key)
     if (tile) {
       const msg = dbc.getSignalMessage(tile.mnemonic)
       if (msg) {
@@ -60,7 +60,7 @@ export default function FavouritesGrid() {
   return (
     <TileGrid onTileMoved={tileMoved} onTileTapped={tileTapped}>
       {tiles.map((f, i) => (
-        <TileGrid.Tile uppercase key={f.id} left={f.left} top={f.top} >
+        <TileGrid.Tile uppercase key={f.mnemonic} left={f.left} top={f.top} >
           <SignalSlab caption={f.name} mnemonic={f.mnemonic} />
         </TileGrid.Tile>
       ))}
