@@ -38,7 +38,7 @@ export default function SignalsGrid(props) {
               case 'slab':
                 return <SignalSlab caption={t.tile.caption} mnemonic={t.signal.mnemonic} showName={t.showSignalName} showUnits={t.showSignalUnits} />
               case 'hero':
-                return <SignalHero caption={t.tile.caption} mnemonic={t.signal.mnemonic} showName={t.showSignalName} showUnits={t.showSignalUnits} />
+                return <SignalHero decimals={0} mnemonic={t.signal.mnemonic} />
             }
           })()}
         </TileGrid.Tile>

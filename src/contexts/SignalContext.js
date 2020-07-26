@@ -96,7 +96,7 @@ export function useSignalState(mnemonic, initialValue) {
 }
 
 export function useSignalDisplay(mnemonic, decimals) {
-  decimals = decimals || 2
+  decimals = decimals === undefined ? 2 : decimals
 
   const { dbc } = useContext(M2)
   const signalValue = useSignalState(mnemonic, '--')
