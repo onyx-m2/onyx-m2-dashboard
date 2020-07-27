@@ -46,8 +46,8 @@ export default function TileGrid(props) {
         const { clientWidth: cellWidth, clientHeight: cellHeight } = placeholderRef.current
         onTileMoved(
           tile.key,
-          clamp(tile.props.left + (dx / (cellWidth + GRID_GAP)), 1, 6 - tile.props.width + 1),
-          clamp(tile.props.top + (dy / (cellHeight  + GRID_GAP)), 1, 8 - tile.props.height + 1)
+          clamp(tile.props.left + (dx / (cellWidth + GRID_GAP)), 1, columns - tile.props.width + 1),
+          clamp(tile.props.top + (dy / (cellHeight  + GRID_GAP)), 1, rows - tile.props.height + 1)
         )
       }
     }
