@@ -33,7 +33,7 @@ browser's frame to give a seamless look.
 Clone the repo and install.
 
 ```
-  git clone git@github.com:johnmccalla/onyx-m2-dashboard.git
+  git clone git@github.com:onyx-m2/onyx-m2-dashboard.git
   cd onyx-m2-dashboard
   npm install
 ```
