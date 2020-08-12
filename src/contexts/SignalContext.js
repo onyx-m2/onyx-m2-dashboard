@@ -85,9 +85,7 @@ export function useSignalState(mnemonic, initialValue) {
   const [ value, setValue ] = useState(initialValue)
   useEffect(() => {
     function handleSignal(newValue) {
-      if (newValue !== value) {
-        setValue(newValue)
-      }
+      setValue(newValue)
     }
     subscribe(mnemonic, handleSignal)
     return () => unsubscribe(mnemonic, handleSignal)

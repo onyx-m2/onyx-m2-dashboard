@@ -72,6 +72,18 @@ export default class DBC {
     return this.signalByMnemonic[mnemonic]
   }
 
+   /**
+   * Get the signal value that matches the specified mnemonic and name.
+   * @param {String} mnemonic: Signal mnemonic
+   * @param {String} name: Value name
+   */
+  getSignalNamedValue(mnemonic, name) {
+    const signal = this.signalByMnemonic[mnemonic]
+    if (signal && signal.namedValues) {
+      return signal.namedValues[name]
+    }
+  }
+
   /**
    * Get all the categories.
    */
@@ -143,6 +155,12 @@ export default class DBC {
       message.signals.forEach(s => {
         this.messageBySignalMnemonic[s.mnemonic] = message
         this.signalByMnemonic[s.mnemonic] = s
+        if (s.values) {
+          s.namedValues = {}
+          Object.keys(s.values).forEach(k => {
+            s.namedValues[s.values[k]] = Number(k)
+          })
+        }
       })
     }
     if (message.multiplexor) {

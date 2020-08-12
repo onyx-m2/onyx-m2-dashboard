@@ -13,7 +13,7 @@ const SCHEMA_VERSION = 2
  * @component
  */
 export default function FavouritesGrid() {
-  const history = useHistory();
+  const history = useHistory()
   const { favourites } = useContext(CMS)
   const { dbc } = useContext(M2)
 

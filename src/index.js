@@ -15,6 +15,7 @@ import { CMSProvider } from './contexts/CMS';
 import { load } from './utils/persistance';
 import Configuration from './components/Configuration';
 import { ThemeProvider } from 'styled-components';
+import { BrowserRouter } from 'react-router-dom';
 
 /**
  * Load the DBC from the M2 server.
@@ -71,7 +72,9 @@ async function init() {
       <CMSProvider signals={signals} menu={menu}>
         <M2Provider dbc={dbc}>
           <SignalProvider>
-            <App />
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
           </SignalProvider>
         </M2Provider>
       </CMSProvider>

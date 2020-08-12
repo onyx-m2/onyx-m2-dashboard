@@ -1,5 +1,5 @@
-import React, { useRef, useContext } from 'react'
-import { BrowserRouter, Switch, Route, Redirect, NavLink } from 'react-router-dom'
+import React, { useRef, useContext, useState } from 'react'
+import { Switch, Route, Redirect, NavLink, useHistory } from 'react-router-dom'
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
 import { useDrag } from 'react-use-gesture'
 import SignalBrowser from './components/SignalBrowser'
@@ -15,7 +15,8 @@ import { useSignalState } from './contexts/SignalContext'
 import { DAY_THEME, NIGHT_THEME } from './theme'
 import FavouritesGrid from './components/FavouritesGrid'
 import CMS from './contexts/CMS'
-import Configuration from './components/Configuration'
+import { useDebouncedCallback } from 'use-debounce'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 /**
  * The App component uses the router to navigate to different panels in the app.
@@ -25,7 +26,7 @@ import Configuration from './components/Configuration'
 export default function App() {
 
   const { grids, modified, saving, saveModified } = useContext(CMS)
-  const { freeze } = useContext(M2)
+  const { dbc, freeze } = useContext(M2)
   const [ appIsOnline, appLatency ] = usePingPongState(1000, 2000)
   const [ m2IsOnline, m2Latency, m2Rate ] = useStatusState()
   const isSunUp = useSignalState('UI_isSunUp', true)
@@ -54,8 +55,34 @@ export default function App() {
     panelRef.current.style.transform = `translate3d(0, 0, 0)`
   }
 
+  const history = useHistory()
+  const [ cycleThroughGrids ] = useDebouncedCallback(() => {
+    if (history.location.pathname.startsWith('/grids')) {
+      const pathname = history.location.pathname
+      const gridSlug = pathname.substring(pathname.lastIndexOf('/') + 1)
+      const index = grids.findIndex(g => g.slug === gridSlug)
+      if (index !== -1) {
+        const newIndex = index > 0 ? index - 1 : grids.length - 1
+        history.push(`/grids/${grids[newIndex].slug}`)
+      }
+    }
+  }, 300)
+
+  // a upwards blip of the gear stalk while in drive does nothing in the car,
+  // so let's use this to cycle through grid displays
+  const gear = useSignalState('DI_gear', 0)
+  const gearStalkStatus = useSignalState('SCCM_gearStalkStatus', 0)
+  const GEAR_D = dbc.getSignalNamedValue('DI_gear', 'D')
+  const GEAR_STALK_UP = dbc.getSignalNamedValue('SCCM_gearStalkStatus', 'UP_1')
+  console.log(`gear: ${gear} / ${GEAR_D}, stalk: ${gearStalkStatus} / ${GEAR_STALK_UP}`)
+  if (gear === GEAR_D && gearStalkStatus === GEAR_STALK_UP) {
+    cycleThroughGrids()
+  }
+  // simulation on pc
+  useHotkeys('pageup', () => cycleThroughGrids())
+
   return (
-    <BrowserRouter>
+    <ThemeProvider theme={isSunUp ? DAY_THEME : NIGHT_THEME}>
       <NavMenu as={Grid} columns={1} gap={0} alignContent='start' onClick={handleNavMenuClick}>
         {grids.map(grid => (
           <NavMenuItem as={NavLink} to={`/grids/${grid.name.toLowerCase()}`} key={grid.id} tiles={grid.tiles} exact>
@@ -76,37 +103,35 @@ export default function App() {
           <div>{appLatency}ms / {m2Latency}ms</div>
         </div>
       </NavMenu>
-      <ThemeProvider theme={isSunUp ? DAY_THEME : NIGHT_THEME}>
-        <Panel {...drag()} ref={panelRef}>
-          {modified &&
-            <SyncButton primary raised rounded onClick={() => saveModified()}>
-              <Icon loading={saving} name='sync' size='big' />
-            </SyncButton>
-          }
-          <Switch>
-            <Route exact path='/'>
-              <Redirect to={`/signals`} />
+      <Panel {...drag()} ref={panelRef}>
+        {modified &&
+          <SyncButton primary raised rounded onClick={() => saveModified()}>
+            <Icon loading={saving} name='sync' size='big' />
+          </SyncButton>
+        }
+        <Switch>
+          <Route exact path='/'>
+            <Redirect to={`/signals`} />
+          </Route>
+          {grids.map(g => (
+            <Route exact key={g.id} path={`/grids/${g.slug}`}>
+              <SignalsGrid grid={g} />
             </Route>
-            {grids.map(g => (
-              <Route exact key={g.id} path={`/grids/${g.slug}`}>
-                <SignalsGrid grid={g} />
-              </Route>
-            ))}
-            <Route exact path='/favourites'>
-              <FavouritesGrid />
-            </Route>
-            <Route exact path='/signals/:categorySlug?/:messageSlug?'>
-              <SignalBrowser basePath='/signals' />
-            </Route>
-            <Route exact path='/configuration' component={() => {
-              window.location.href = '/configuration'
-              return null
-            }}/>
-          </Switch>
-        </Panel>
-      </ThemeProvider>
+          ))}
+          <Route exact path='/favourites'>
+            <FavouritesGrid />
+          </Route>
+          <Route exact path='/signals/:categorySlug?/:messageSlug?'>
+            <SignalBrowser basePath='/signals' />
+          </Route>
+          <Route exact path='/configuration' component={() => {
+            window.location.href = '/configuration'
+            return null
+          }}/>
+        </Switch>
+      </Panel>
       <ConnectionPopup appStatus={appIsOnline} m2Status={m2IsOnline} />
-    </BrowserRouter>
+    </ThemeProvider>
   )
 }
 
