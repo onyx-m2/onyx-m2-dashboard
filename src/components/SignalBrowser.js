@@ -36,16 +36,23 @@ export default function SignalBrowser(props) {
 
   const theme = useContext(ThemeContext)
 
-  function onCategorySelected(slug) {
+  function onCategorySelected(e, slug) {
     if (slug !== category.slug) {
       history.push(`${props.basePath}/${slug}`)
+      e.stopPropagation()
     }
   }
 
-  function onMessageSelected(slug) {
+  function onMessageSelected(e, slug) {
     if (slug !== message.slug) {
       history.push(`${props.basePath}/${category.slug}/${slug}`)
+      e.stopPropagation()
     }
+  }
+
+  function onFavouriteToggled(e, signal) {
+    e.stopPropagation()
+    toggleFavourite(signal)
   }
 
   const categories = dbc.getCategories()
@@ -55,7 +62,7 @@ export default function SignalBrowser(props) {
     <Grid gap='20px' row={1} columns={3}>
       <ScrollContainer as={Tile}>
         {categories.map(c => (
-            <ListItem uppercase key={c.slug} selected={c.slug === category.slug} onMouseUp={() => onCategorySelected(c.slug)}>
+            <ListItem uppercase key={c.slug} selected={c.slug === category.slug} onClickCapture={(e) => onCategorySelected(e, c.slug)}>
               <ListItem.Header>{c.slug}</ListItem.Header>
               {c.name}
             </ListItem>
@@ -63,7 +70,7 @@ export default function SignalBrowser(props) {
       </ScrollContainer>
       <ScrollContainer as={Tile}>
         {messages.map(m => (
-          <ListItem uppercase key={m.slug} selected={m.slug === message.slug} onMouseUp={(e) => onMessageSelected(m.slug)}>
+          <ListItem uppercase key={m.slug} selected={m.slug === message.slug} onClickCapture={(e) => onMessageSelected(e, m.slug)}>
             <ListItem.Header>{m.id}</ListItem.Header>
             {m.name}
           </ListItem>
@@ -71,7 +78,7 @@ export default function SignalBrowser(props) {
       </ScrollContainer>
       <ScrollContainer as={Tile} uppercase>
         {signals.map(s => (
-          <SignalSlab key={s.mnemonic} mnemonic={s.mnemonic} icon={isFavourite(s) ? 'olive star' : ''} onMouseUp={() => toggleFavourite(s)} />
+          <SignalSlab key={s.mnemonic} mnemonic={s.mnemonic} icon={isFavourite(s) ? 'olive star' : ''} onClickCapture={(e) => onFavouriteToggled(e, s)} />
         ))}
       </ScrollContainer>
     </Grid>
