@@ -56,30 +56,34 @@ export default function App() {
   }
 
   const history = useHistory()
-  const [ cycleThroughGrids ] = useDebouncedCallback(() => {
-    if (history.location.pathname.startsWith('/grids')) {
-      const pathname = history.location.pathname
+  const pathname = history.location.pathname
+  const [ cycleThroughPanels ] = useDebouncedCallback(() => {
+    if (pathname.startsWith('/grids')) {
       const gridSlug = pathname.substring(pathname.lastIndexOf('/') + 1)
       const index = grids.findIndex(g => g.slug === gridSlug)
-      if (index !== -1) {
-        const newIndex = index > 0 ? index - 1 : grids.length - 1
-        history.push(`/grids/${grids[newIndex].slug}`)
+      if (index > 0) {
+        history.push(`/grids/${grids[index - 1].slug}`)
+      } else {
+        history.push('/favourites')
       }
+    }
+    else if (pathname.startsWith('/favourites')) {
+      history.push(`/grids/${grids[grids.length - 1].slug}`)
     }
   }, 300)
 
   // a upwards blip of the gear stalk while in drive does nothing in the car,
-  // so let's use this to cycle through grid displays
+  // so let's use this to cycle through panels
   const gear = useSignalState('DI_gear', 0)
   const gearStalkStatus = useSignalState('SCCM_gearStalkStatus', 0)
   const GEAR_D = dbc.getSignalNamedValue('DI_gear', 'D')
   const GEAR_STALK_UP = dbc.getSignalNamedValue('SCCM_gearStalkStatus', 'UP_1')
   console.log(`gear: ${gear} / ${GEAR_D}, stalk: ${gearStalkStatus} / ${GEAR_STALK_UP}`)
   if (gear === GEAR_D && gearStalkStatus === GEAR_STALK_UP) {
-    cycleThroughGrids()
+    cycleThroughPanels()
   }
   // simulation on pc
-  useHotkeys('pageup', () => cycleThroughGrids())
+  useHotkeys('pageup', () => cycleThroughPanels())
 
   return (
     <ThemeProvider theme={isSunUp ? DAY_THEME : NIGHT_THEME}>
