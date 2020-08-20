@@ -47,20 +47,17 @@ export default function FavouritesGrid() {
     save('favourites-positions', SCHEMA_VERSION, updatedPositions)
   }
 
-  function tileTapped(key) {
-    const tile = tiles.find(t => t.mnemonic == key)
-    if (tile) {
-      const msg = dbc.getSignalMessage(tile.mnemonic)
-      if (msg) {
-        setTimeout(() => history.push(`/signals/${msg.category}/${msg.slug}`))
-      }
+  function onTileTapped(e, tile) {
+    const msg = dbc.getSignalMessage(tile.mnemonic)
+    if (msg) {
+      history.push(`/signals/${msg.category}/${msg.slug}`)
     }
   }
 
   return (
-    <TileGrid onTileMoved={tileMoved} onTileTapped={tileTapped}>
+    <TileGrid onTileMoved={tileMoved}>
       {tiles.map((f, i) => (
-        <TileGrid.Tile uppercase key={f.mnemonic} left={f.left} top={f.top} >
+        <TileGrid.Tile uppercase key={f.mnemonic} left={f.left} top={f.top} onClick={(e) => onTileTapped(e, f)}>
           <SignalSlab caption={f.name} mnemonic={f.mnemonic} />
         </TileGrid.Tile>
       ))}

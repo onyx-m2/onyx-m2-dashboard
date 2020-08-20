@@ -52,7 +52,6 @@ export default function TileGrid(props) {
       }
     }
     event.stopPropagation()
-    event.preventDefault()
   })
 
   const gridCells = useMemo(() => {

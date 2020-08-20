@@ -42,7 +42,6 @@ export default function App() {
       freeze(false)
       if (!tap) {
         event.stopPropagation()
-        event.preventDefault()
       }
     }
     style.transform = `translate3d(${x}px, 0, 0)`
@@ -79,7 +78,6 @@ export default function App() {
   const gearStalkStatus = useSignalState('SCCM_gearStalkStatus', 0)
   const GEAR_D = dbc.getSignalNamedValue('DI_gear', 'D')
   const GEAR_STALK_UP = dbc.getSignalNamedValue('SCCM_gearStalkStatus', 'UP_1')
-  console.log(`gear: ${gear} / ${GEAR_D}, stalk: ${gearStalkStatus} / ${GEAR_STALK_UP}`)
   if (gear === GEAR_D && gearStalkStatus === GEAR_STALK_UP) {
     cycleThroughPanels()
   }
