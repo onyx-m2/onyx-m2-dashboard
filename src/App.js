@@ -42,6 +42,7 @@ export default function App() {
       freeze(false)
       if (!tap) {
         event.stopPropagation()
+        event.preventDefault()
       }
     }
     style.transform = `translate3d(${x}px, 0, 0)`
