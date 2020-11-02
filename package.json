@@ -8,6 +8,8 @@
     "@testing-library/user-event": "^7.2.1",
     "axios": "^0.19.2",
     "bit-buffer": "^0.2.4",
+    "devextreme": "^20.1.8",
+    "devextreme-react": "20.1.7",
     "react": "^16.13.1",
     "react-dnd": "^10.0.2",
     "react-dnd-html5-backend": "^10.0.2",

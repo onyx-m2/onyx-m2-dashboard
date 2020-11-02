@@ -14,6 +14,7 @@ import { DAY_THEME } from './theme';
 import { CMSProvider } from './contexts/CMS';
 import { load } from './utils/persistance';
 import Configuration from './components/Configuration';
+import ElectronicInstrumentCluster from './ElectronicInstrumentCluster';
 import { ThemeProvider } from 'styled-components';
 import { BrowserRouter } from 'react-router-dom';
 
@@ -83,12 +84,39 @@ async function init() {
   )
 }
 
+/**
+ * Initialize the application in electronic instrument cluster mod, and render once
+ * all the data is loaded.
+ */
+async function initEIC() {
+  const dbc = await loadDBC()
+  ReactDOM.render(
+    <React.StrictMode>
+        <M2Provider dbc={dbc}>
+          <SignalProvider>
+            <ElectronicInstrumentCluster />
+          </SignalProvider>
+        </M2Provider>
+    </React.StrictMode>,
+    document.getElementById('root')
+  )
+}
+
+
 // Check for configuration requests, or first time run (super lazy implementation - but better than nothing?)
 async function checkConfig() {
   const config = load('config', 1)
   if (config && window.location.pathname !== '/configuration') {
     await configure(config)
-    init()
+
+    // monkey patch in the electronic instrument cluster mobile experiment here
+    // TODO: integrate this better if this works
+    if (window.location.pathname === '/hud') {
+      initEIC()
+    }
+    else {
+      init()
+    }
   }
   else {
     ReactDOM.render(

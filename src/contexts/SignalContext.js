@@ -120,3 +120,10 @@ export function useSignalDisplay(mnemonic, decimals) {
   }
   return { name, value, units }
 }
+
+export function useNamedValuesSignalState(mnemonic, initialValue) {
+  const { dbc } = useContext(M2)
+  const definition = dbc.getSignal(mnemonic)
+  const state = useSignalState(mnemonic, definition.namedValues[initialValue])
+  return [ state, definition.namedValues ]
+}

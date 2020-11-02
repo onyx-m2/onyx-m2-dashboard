@@ -116,3 +116,15 @@ export const Button = styled.button`
     '3px 7px 10px 0 rgba(34, 36, 38, 0.52)':
     '0px 0px 0px 1px transparent inset, 0px 0em 0px 0px rgba(34, 36, 38, 0.15) inset'};
 `
+
+export const FadeableComponent = styled.div`
+  opacity: ${props => props.visible ? 1 : 0};
+  transition: opacity 0.3s ease;
+  visibility: ${props => props.visible ? 'visible' : 'hidden'};
+`
+
+// export const FadeableComponent = styled.div`
+//   opacity: 1;
+//   transition: opacity 0.3s ease;
+//   visibility: visible;
+// `
