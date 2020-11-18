@@ -5,7 +5,7 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker'
 
-import { M2Provider } from './contexts/M2'
+import M2, { M2Provider } from './contexts/M2'
 import { SignalProvider } from './contexts/SignalContext'
 import DBC from './utils/DBC'
 import { m2, cms, configure } from './utils/services'
@@ -105,13 +105,21 @@ async function initEIC() {
 
 // Check for configuration requests, or first time run (super lazy implementation - but better than nothing?)
 async function checkConfig() {
-  const config = load('config', 1)
+  let config = load('config', 1)
+  if (!config && global.M2) {
+    config = {
+      server: global.M2.getPreference('server_hostname'),
+      pin: global.M2.getPreference('server_pin'),
+      secure: true,
+      cms: {}
+     }
+  }
   if (config && window.location.pathname !== '/configuration') {
     await configure(config)
 
     // monkey patch in the electronic instrument cluster mobile experiment here
     // TODO: integrate this better if this works
-    if (window.location.pathname === '/hud') {
+    if (window.location.host.startsWith('eic') || window.location.pathname === '/eic') {
       initEIC()
     }
     else {
