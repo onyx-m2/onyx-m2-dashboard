@@ -1,4 +1,5 @@
 import React, { createContext, useEffect, useContext, useState } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
 import { ws } from '../utils/services'
 
 const M2 = createContext()
@@ -111,15 +112,28 @@ export function usePingPongState(frequency, timeout) {
  * Status protocol implementation that tracks the M2's online status and latency
  * between itself and the server.
  */
-export function useStatusState() {
+export function useStatusState(options) {
   const { ws, listeners } = useContext(M2)
   const [ online, setOnline ] = useState(false)
+  const [ ignoreOnlineStatus, setIgnoreOnlineStatus ] = useState(false)
   const [ latency, setLatency ] = useState(0)
   const [ rate, setRate ] = useState(0)
 
+  useHotkeys(options?.forceOnlineKey, () => {
+    setIgnoreOnlineStatus(true)
+    setOnline(true)
+  })
+
+  useHotkeys(options?.forceOfflineKey, () => {
+    setIgnoreOnlineStatus(true)
+    setOnline(false)
+  })
+
   useEffect(() => {
     function handleStatus({ detail: [ online, latency, rate ] }) {
-      setOnline(online)
+      if (!ignoreOnlineStatus) {
+        setOnline(online)
+      }
       setLatency(latency)
       setRate(rate)
     }

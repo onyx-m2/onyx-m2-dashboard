@@ -8,7 +8,7 @@ import { ReactComponent as ESPIcon} from './assets/esp.svg'
 import OnyxLogo from './assets/onyx.svg'
 
 import styled, { ThemeProvider } from 'styled-components';
-import { useSignalState } from './contexts/SignalContext';
+import { useSignalHotkeySimulation, useSignalState } from './contexts/SignalContext';
 import BatteryGauge from './components/gauges/BatteryGauge'
 import LaneKeepingGauge from './components/gauges/LaneKeepingGauge'
 import TirePressureDisplay from './components/displays/TirePressureDisplay'
@@ -19,6 +19,50 @@ import RightTurnIndicator from './components/indicators/RightTurnIndicator'
 import GearIndicator from './components/indicators/GearIndicator';
 import { useStatusState } from './contexts/M2';
 import { GridContextProvider } from './contexts/GridContext';
+
+//if (global.M2) {
+  //THIS WORKS!!!!!
+  //setTimeout(() => global.M2.sendCommand(JSON.stringify([1,1,0])), 5000)
+  //global.addEventListener('m2', ({ detail: [ ts, bus, id, data ] }) => {
+  //  console.log(`ts: ${ts}, bus: ${bus}, id: ${id}, data: ${data}`)
+    //
+  //   const bits = new BitView(data)
+  //   const def = dbc.getMessageFromId(bus, id)
+  //   if (!def) {
+  //     return log.warn(`No definition for message ${id} on bus ${bus}`)
+  //   }
+
+  //   const ingress = {}
+  //   if (def.signals) {
+  //     def.signals.forEach(s => {
+  //       ingress[s.mnemonic] = dbc.decodeSignal(bits, s)
+  //     })
+  //   }
+  //   if (def.multiplexor) {
+  //     const multiplexId = ingress[def.multiplexor.mnemonic] = dbc.decodeSignal(bits, def.multiplexor)
+  //     const multiplexed = def.multiplexed[multiplexId]
+  //     if (multiplexed) {
+  //       multiplexed.forEach(s => {
+  //         ingress[s.mnemonic] = dbc.decodeSignal(bits, s)
+  //       })
+  //     } else {
+  //       log.warn(`Message ${def.mnemonic} doesn't have a multiplexed signal for ${multiplexId}`)
+  //     }
+  //     const subscribedSignals = ws.subscriptions.filter(s => s in ingress)
+  //     const oneShotSignals = ws.oneShotSignals.filter(s => s in ingress)
+  //     const signals = [...new Set([...subscribedSignals, ...oneShotSignals])].map(s => [s, ingress[s]])
+  //     if (signals.length > 0) {
+  //       sendJSON(ws, 'signal', signals) // <----------- this becomes listeners.dispatchEvent(m2Event)
+  //     }
+  //     ws.oneShotSignals = ws.oneShotSignals.filter(s => !oneShotSignals.includes(s))
+
+  //   }
+//  })
+//}
+
+//M2.onMessage = function(ts, bus, id, data) {
+
+//}
 
 // Trip meter could be "display" with clock (arrival time) and hourglass (time to dest)
 
@@ -95,8 +139,8 @@ import { GridContextProvider } from './contexts/GridContext';
  */
 export default function ElectronicInstrumentCluster(props) {
   const theme = INSTRUMENTS_THEME
-  const displayOn = 1// TEMP TEMP TEMP useSignalState('UI_displayOn', 1)
-  const [ m2IsOnline ] = useStatusState()
+  const displayOn = useSignalState('UI_displayOn', 0)
+  const [ m2IsOnline ] = useStatusState({forceOnlineKey: 'pageup', forceOfflineKey: 'pagedown'})
   const speed = useSignalState('DI_uiSpeed', 0)
   const odometer = useSignalState('DI_odometer', 0)
 
@@ -104,7 +148,51 @@ export default function ElectronicInstrumentCluster(props) {
   const drivePower = useSignalState('DI_sysDrivePowerMax', 240)
   const regenPower = useSignalState('DI_sysRegenPowerMax', 60)
 
-  const ready = 1// TEMP TEMP odometer > 0
+  useSignalHotkeySimulation({
+
+    // turn on the display
+    'home': [
+      ['UI_displayOn', 1],
+      ['UI_usableSOC', 69]
+    ],
+
+    // set the car to "ready" state, (o)dometer on
+    'o': [
+      ['DI_odometer', 69420],
+      ['DI_gear', 'P']
+    ],
+
+    // gear selection
+    'p': [['DI_gear', 'P']],
+    'r': [['DI_gear', 'R']],
+    'n': [['DI_gear', 'N']],
+    'd': [['DI_gear', 'D']],
+
+    // hit the (b)rakes
+    'b': [
+      ['VCLEFT_brakeLightStatus', 'ON'],
+      ['DI_uiSpeed', 0],
+      ['DI_elecPower', -20]
+    ],
+
+    // hit the (a)ccelerator
+    'a': [
+      ['VCLEFT_brakeLightStatus', 0],
+      ['DI_uiSpeed', 50],
+      ['DI_elecPower', 20]
+    ],
+
+    'left': [
+      ['VCLEFT_turnSignalStatus', 'ON']
+    ],
+
+    'right': [
+      ['VCRIGHT_turnSignalStatus', 'ON']
+    ]
+
+  })
+
+  const ready = odometer > 0
   const consumption = 140
 
   var speedColour = theme.indicator.white
@@ -121,11 +209,13 @@ export default function ElectronicInstrumentCluster(props) {
     powerColour = theme.indicator.green
   }
 
-  if (!displayOn) {
-    return (
-      <Display/>
-    )
-  }
+  // this would/will be relevant with a permanent installation, not with a phone
+  // you take with you
+  // if (!displayOn) {
+  //   return (
+  //     <Display/>
+  //   )
+  // }
 
   if (!m2IsOnline) {
     return (
@@ -194,7 +284,7 @@ export default function ElectronicInstrumentCluster(props) {
             {/* Top indicators */}
             <Cell as={LaneKeepingGauge} left={6} top={1} width={4} />
             <Cell as={LeftTurnIndicator} top={1} left={6} />
-            <Cell as={RightTurnIndicator} top={1} left={10} />
+            <Cell as={RightTurnIndicator} top={1} left={9} />
 
             {/* Middle indicators */}
             <Cell as={AutopilotIndicator} top={2} left={7} width={2} />
@@ -205,12 +295,6 @@ export default function ElectronicInstrumentCluster(props) {
             } */}
             <Cell as={BreakingIndicator} top={4} left={7} width={2} />
             <Cell as={GearIndicator} top={5} left={7} width={2} />
-            {/* Gear selection indicator */}
-            {/* // <FlexCell top={5} left={7} width={3} style={{fontSize: '24px', textAlign: 'center', color: theme.indicator.white}} >
-            //   <GearIndicator>
-            //     <span style={{color: 'rgb(255, 255, 255, 0.7)'}}>P R N</span> D
-            //   </GearIndicator>
-            // </FlexCell> */}
 
             {/* Power gauge */}
             { ready &&
@@ -244,12 +328,6 @@ export default function ElectronicInstrumentCluster(props) {
               </Cell>
             }
 
-            {/* {!ready &&
-              <Cell top={1} left={4} width={9} height={3}>
-                <OnyxLogo  />
-              </Cell>
-            } */}
-
             {/* Display divider */}
             <Cell style={{overflow: 'hidden'}} top={6} left={1} width={14} height={2}>
               <svg viewBox='0 0 200 100'>
@@ -263,7 +341,9 @@ export default function ElectronicInstrumentCluster(props) {
             </Cell>
             <Cell as={TirePressureDisplay} top={6} left={6} width={4} height={2} />
 
+            {/* Battery gauge */}
             <Cell as={BatteryGauge} left={11} top={6} width={4} height={2} />
+
           </GridContextProvider>
         </Grid>
       </Display>

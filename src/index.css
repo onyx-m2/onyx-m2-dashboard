@@ -16,4 +16,5 @@ body ::-webkit-scrollbar {
 
 body {
   overflow: hidden;
+  background-color: black;
 }
