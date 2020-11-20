@@ -1,5 +1,3 @@
-//import { LinearGauge } from 'devextreme-react'
-//import { RangeContainer, Size, Scale, Tick, Label, Range, ValueIndicator, Animation } from 'devextreme-react/linear-gauge'
 import React, { useContext } from 'react'
 import { ThemeContext } from 'styled-components'
 import GridContext from '../../contexts/GridContext'
@@ -18,7 +16,7 @@ export default function BatteryGauge(props) {
   const distanceFromLaneCenter = useSignalState('DAS_virtualLaneC0', 0) // cm
 
   var enabled = true
-  if ((leftLineUsage != lineUsage.FUSED && rightLineUsage != lineUsage.FUSED) || laneWidth == 0) {
+  if ((leftLineUsage !== lineUsage.FUSED && rightLineUsage !== lineUsage.FUSED) || laneWidth === 0) {
     enabled = false
   }
 

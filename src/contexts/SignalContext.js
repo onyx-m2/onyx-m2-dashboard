@@ -11,7 +11,7 @@ export const SignalContext = createContext()
  */
 export function SignalProvider(props) {
   const { children } = props
-  const { transport, dbc } = useContext(M2)
+  const { transport } = useContext(M2)
   if (!transport) {
     throw new Error('M2Provider is missing in render tree')
   }
@@ -55,7 +55,7 @@ export function SignalProvider(props) {
     }
     transport.addEventListener('signal', handleSignal)
     return () => transport.removeEventListener('signal', handleSignal)
-  }, [dbc])
+  }, [transport])
 
   // handle reconnects by re-subscribing to the signals we require
   useEffect(() => {
@@ -66,7 +66,7 @@ export function SignalProvider(props) {
     transport.addEventListener('hello', handleHello)
 
     return () => transport.removeEventListener('hello', handleHello)
-  }, [dbc])
+  }, [transport])
 
   return (
     <SignalContext.Provider value={{ subscribe, unsubscribe }}>
@@ -90,7 +90,7 @@ export function useSignalState(mnemonic, initialValue) {
     }
     subscribe(mnemonic, handleSignal)
     return () => unsubscribe(mnemonic, handleSignal)
-  }, [mnemonic])
+  }, [subscribe, unsubscribe, mnemonic])
   return value
 }
 

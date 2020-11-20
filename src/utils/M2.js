@@ -1,3 +1,5 @@
+/*eslint no-unused-vars: ["error", { "varsIgnorePattern": "CAN_MSG_FLAG_TRANSMIT_UNMODIFIED" }]*/
+
 const CAN_MSG_FLAG_RESET = 0x00
 const CAN_MSG_FLAG_TRANSMIT = 0x01
 const CAN_MSG_FLAG_TRANSMIT_UNMODIFIED = 0x02

@@ -12,12 +12,12 @@ export default function AutopilotIndicator(props) {
   // if ap is not active, or there's no signal from the hands on detection, don't
   // light up the indicator
   var visible = true
-  if (state == states.SNA || state == states.DISABLED || state == states.UNAVAILABLE) {
+  if (state === states.SNA || state === states.DISABLED || state === states.UNAVAILABLE) {
     visible = false
   }
 
   var color = theme.indicator.grey
-  if (state == states.ACTIVE_NOMINAL) {
+  if (state === states.ACTIVE_NOMINAL) {
     switch (handsOnState) {
       case handsOnStates.SNA:
       case handsOnStates.REQD_DETECTED:
@@ -40,6 +40,8 @@ export default function AutopilotIndicator(props) {
       case handsOnStates.SUSPENDED:
         color = theme.indicator.red
         break
+
+      // no default
     }
   }
   return (

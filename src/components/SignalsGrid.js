@@ -1,5 +1,4 @@
-import React, { useContext, useState, useRef, useEffect, useMemo, forwardRef } from 'react'
-import PropTypes from 'prop-types'
+import React, { useContext } from 'react'
 import { SignalPill, SignalSlab, SignalHero } from './Signal'
 import TileGrid from './TileGrid'
 import CMS from '../contexts/CMS'
@@ -39,6 +38,7 @@ export default function SignalsGrid(props) {
                 return <SignalSlab caption={t.tile.caption} mnemonic={t.signal.mnemonic} showName={t.showSignalName} showUnits={t.showSignalUnits} />
               case 'hero':
                 return <SignalHero decimals={0} mnemonic={t.signal.mnemonic} />
+              // no default
             }
           })()}
         </TileGrid.Tile>

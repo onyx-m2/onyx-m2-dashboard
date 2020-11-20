@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import './ConnectionPopup.css'
 import { Message, Icon } from 'semantic-ui-react'
-import { m2 } from '../utils/services'
 
 /**
  * Component that flashes a floating message when there connection issues.
@@ -26,7 +25,7 @@ export default function ConnectionPopup(props) {
 
   if (!m2Status) {
     return (
-      <Message color='black' icon floating className='ConnectionPopup' onClick={() => m2.post('/tesla/wakeup')}>
+      <Message color='black' icon floating className='ConnectionPopup'>
         <SuccessIcon icon='image' />
         <LoadingIcon icon='car' />
         <Message.Content>

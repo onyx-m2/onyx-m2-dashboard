@@ -1,6 +1,5 @@
 import React, { createContext, useEffect, useContext, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { ws } from '../utils/services'
 
 const M2 = createContext()
 export default M2
@@ -53,9 +52,7 @@ export function usePingPongState(frequency, timeout) {
     }, frequency)
 
     function handlePong() {
-      if (!connected) {
-        setConnected(true)
-      }
+      setConnected(true)
       setLatency(Date.now() - at)
       at = 0
     }
@@ -65,7 +62,7 @@ export function usePingPongState(frequency, timeout) {
       transport.removeEventListener('pong', handlePong)
       clearInterval(intervalId)
     }
-  }, [ws, frequency, timeout])
+  }, [transport, frequency, timeout])
 
   return [ connected, latency ]
 }
@@ -101,7 +98,7 @@ export function useStatusState(options) {
     }
     transport.addEventListener('status', handleStatus)
     return () => transport.removeEventListener('status', handleStatus)
-  }, [transport])
+  }, [transport, ignoreOnlineStatus])
 
   return [ online, latency, rate ]
 }

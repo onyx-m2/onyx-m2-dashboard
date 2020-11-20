@@ -5,7 +5,7 @@ import { useParams, useHistory } from 'react-router-dom'
 import M2 from '../contexts/M2'
 import { Grid } from 'styled-css-grid'
 import { ScrollContainer, Tile } from './Base'
-import styled, { ThemeContext } from 'styled-components'
+import styled from 'styled-components'
 import CMS from '../contexts/CMS'
 
 /**
@@ -33,8 +33,6 @@ export default function SignalBrowser(props) {
   if (redirect) {
     history.replace(`${props.basePath}/${category.slug}/${message.slug}`)
   }
-
-  const theme = useContext(ThemeContext)
 
   function onCategorySelected(e, slug) {
     if (slug !== category.slug) {

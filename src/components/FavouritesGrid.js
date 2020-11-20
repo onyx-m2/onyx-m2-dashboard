@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef, useEffect, useMemo, forwardRef } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { SignalSlab } from './Signal'
 import TileGrid from './TileGrid'
 import M2 from '../contexts/M2'
@@ -25,11 +25,11 @@ export default function FavouritesGrid() {
       top: positions[f.mnemonic]?.top || 1,
       ...f
     })))
-  }, [favourites])
+  }, [positions, favourites])
 
   function tileMoved(key, left, top) {
     const updatedTiles = tiles.map(t => {
-      if (t.mnemonic == key) {
+      if (t.mnemonic === key) {
         return { ...t, left, top }
       }
       return t

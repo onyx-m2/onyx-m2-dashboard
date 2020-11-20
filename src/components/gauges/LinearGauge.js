@@ -1,5 +1,5 @@
-import React, { Children, cloneElement, createContext, useContext } from 'react'
-import styled, { ThemeContext } from 'styled-components'
+import React, { Children, cloneElement } from 'react'
+import styled from 'styled-components'
 
 
 // SVG doesn't seem to want to play nice with dynamic sizing (which is ironic for a
@@ -36,13 +36,13 @@ export function Range(props) {
   const { from, to, color, offset, interval, min, max } = props
 
   var x1 = from
-  if (from != min) {
+  if (from !== min) {
     x1 += 1
   }
   x1 = (x1 + offset) * interval
 
   var x2 = to
-  if (to != max) {
+  if (to !== max) {
     x2 -= 1
   }
   x2 = (x2 + offset) * interval

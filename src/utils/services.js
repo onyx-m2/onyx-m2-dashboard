@@ -1,17 +1,4 @@
 import axios from 'axios'
-import ReconnectingWebSocket from 'reconnecting-websocket'
-
-/**
- * M2 websocket
- * Send and receive realtime M2 messages
- */
-export var ws
-
-/**
- * M2 server API
- * CRUD access to data stored on the server
- */
-export var m2
 
 /**
  * CMS API
@@ -20,9 +7,8 @@ export var m2
 export var cms
 
 export async function configure(config) {
-  const { server, pin, secure } = config
+  const { server, secure } = config
   const httpProtocol = secure ? 'https' : 'http'
-  const wsProtocol = secure ? 'wss' : 'ws'
 
   const cmsServer = config.cms.server || `cms.${server}`
   const cmsUrl = `${httpProtocol}://${cmsServer}`

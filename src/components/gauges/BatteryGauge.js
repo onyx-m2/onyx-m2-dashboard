@@ -4,7 +4,7 @@ import styled, { ThemeContext } from 'styled-components'
 import { useSignalState } from '../../contexts/SignalContext'
 import GridContext from '../../contexts/GridContext'
 import { FadeableComponent } from '../Base'
-import { ReactComponent as SnowflakeIcon } from '../../assets/snowflake.svg'
+//import { ReactComponent as SnowflakeIcon } from '../../assets/snowflake.svg'
 import { Cell, Grid } from 'styled-css-grid'
 
 // FIXME: alignment in this component is super hacky - probably won't work if moved around or resized
@@ -14,8 +14,8 @@ export default function BatteryGauge(props) {
   const { calcWidth } = useContext(GridContext)
 
   const usableSOC = useSignalState('UI_usableSOC', -1)
-  const actualSOC = useSignalState('UI_actualSOC', -1)
-  const coldMode = usableSOC != actualSOC
+  //const actualSOC = useSignalState('UI_actualSOC', -1)
+  //const coldMode = usableSOC !== actualSOC
 
   const nominalFullPackEnergy = useSignalState('BMS_nominalFullPackEnergy', 50)
   const tripPlanningActive = useSignalState('UI_tripPlanningActive', 0)
@@ -36,7 +36,7 @@ export default function BatteryGauge(props) {
   }
 
   return (
-    <FadeableComponent {...props} visible={usableSOC != -1}>
+    <FadeableComponent {...props} visible={usableSOC !== -1}>
       <Grid rows='2' columns='2' gap='0'>
         <Cell top='1' left='1'>
           {/* <ColdModeSOCDisplay>
@@ -71,7 +71,8 @@ const StateOfChargeDisplay = styled.div`
 const StateOfCharge = styled.span`
   font-size: ${props => props.theme.font.size.large};
 `
-const ColdModeSOCDisplay = styled.div`
-  font-size: ${props => props.theme.font.size.medium};
-  color: ${props => props.theme.indicator.blue};
-`
+
+// const ColdModeSOCDisplay = styled.div`
+//   font-size: ${props => props.theme.font.size.medium};
+//   color: ${props => props.theme.indicator.blue};
+// `

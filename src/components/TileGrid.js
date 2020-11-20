@@ -1,5 +1,4 @@
-import React, { useContext, useState, useRef, useEffect, useMemo, forwardRef, createContext, Children, cloneElement } from 'react'
-import PropTypes from 'prop-types'
+import React, { useContext, useState, useRef, useMemo, Children, cloneElement } from 'react'
 import { Grid, Cell } from 'styled-css-grid'
 import { useDrag } from 'react-use-gesture'
 import styled from 'styled-components'
@@ -62,7 +61,7 @@ export default function TileGrid(props) {
       }
     }
     return cells
-  }, [])
+  }, [rows, columns])
 
   return (
     <FullWidthGrid gap={`${GRID_GAP}px`} rows={rows} columns={columns}>

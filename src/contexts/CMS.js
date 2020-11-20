@@ -61,7 +61,7 @@ export function CMSProvider(props) {
       ...grid,
       modified: true,
       tiles: grid.tiles.map(t => {
-        if (t.id == tileId) {
+        if (t.id === tileId) {
           return { ...t, tile: { ...t.tile, left, top } }
         }
         return t
@@ -82,10 +82,10 @@ export function CMSProvider(props) {
     grids.filter(g => g.modified).forEach(g => {
       updates.push(cms.put(`/grids/${g.id}`, g))
     })
-    signals.filter(s => s.state == STATE_NEW).forEach(s => {
+    signals.filter(s => s.state === STATE_NEW).forEach(s => {
       updates.push(cms.post(`/signals`, s))
     })
-    signals.filter(s => s.state == STATE_TOGGLED).forEach(s => {
+    signals.filter(s => s.state === STATE_TOGGLED).forEach(s => {
       updates.push(cms.put(`/signals/${s.id}`, { favourite: s.favourite }))
     })
     await Promise.all(updates)

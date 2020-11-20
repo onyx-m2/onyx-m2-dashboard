@@ -1,10 +1,10 @@
-import React, { useContext, useState, useRef, useEffect, useMemo, forwardRef } from 'react'
+import React from 'react'
 
 import CircularGauge, { Font, Geometry, Range, RangeContainer, Scale, Label, Tick, ValueIndicator, Animation } from 'devextreme-react/circular-gauge';
 
 import { Grid, Cell } from 'styled-css-grid'
 import { INSTRUMENTS_THEME } from './theme'
-import { ReactComponent as ESPIcon} from './assets/esp.svg'
+//import { ReactComponent as ESPIcon} from './assets/esp.svg'
 import OnyxLogo from './assets/onyx.svg'
 
 import styled, { ThemeProvider } from 'styled-components';
@@ -139,7 +139,7 @@ import { GridContextProvider } from './contexts/GridContext';
  */
 export default function ElectronicInstrumentCluster(props) {
   const theme = INSTRUMENTS_THEME
-  const displayOn = useSignalState('UI_displayOn', 0)
+  //const displayOn = useSignalState('UI_displayOn', 0)
   const [ m2IsOnline ] = useStatusState({forceOnlineKey: 'pageup', forceOfflineKey: 'pagedown'})
 
   const speed = useSignalState('DI_uiSpeed', 0)
@@ -402,11 +402,11 @@ const CircularGaugeSubUnits = styled.div`
 const GaugeCLuster = styled.div`
   position: relative;
 `
-const FlexCell = styled(Cell)`
-  display: flex;
-  place-self: center;
-  flex-direction: ${props => props.vertical ? 'column' : 'row'};
-`
+// const FlexCell = styled(Cell)`
+//   display: flex;
+//   place-self: center;
+//   flex-direction: ${props => props.vertical ? 'column' : 'row'};
+// `
 
 const LogoDisplay = styled.div`
   height: 393px; //100vh;

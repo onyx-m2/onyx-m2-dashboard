@@ -1,7 +1,5 @@
-import React, { useContext, Children, cloneElement } from 'react'
-import PropTypes from 'prop-types'
-import M2 from '../contexts/M2'
-import { useSignalState, useSignalDisplay } from '../contexts/SignalContext'
+import React from 'react'
+import { useSignalDisplay } from '../contexts/SignalContext'
 import { Icon } from 'semantic-ui-react'
 import { Grid } from 'styled-css-grid'
 import styled from 'styled-components'
@@ -29,7 +27,7 @@ export function SignalSlab(props) {
  * @component
  */
 export function SignalPill(props) {
-  const { icon, decimals, mnemonic } = props
+  const { decimals, mnemonic } = props
   const { value, units } = useSignalDisplay(mnemonic, decimals)
   return (
     <CenteredGrid alignItems='center' rows={'2fr 1fr'} columns={1} {...props}>
@@ -41,7 +39,7 @@ export function SignalPill(props) {
 
 export function SignalHero(props) {
   const { decimals, mnemonic } = props
-  const { name, value, units } = useSignalDisplay(mnemonic, decimals)
+  const { value, units } = useSignalDisplay(mnemonic, decimals)
   return (
     <CenteredGrid alignItems='center' rows={'5fr 1fr'} columns={1} {...props}>
       <BigValue>{value}</BigValue>
@@ -55,11 +53,10 @@ const CenteredGrid = styled(Grid)`
   justify-items: center;
 `
 
-const BigData = styled.div`
-  text-align: center;
-  margin-top: 6px;
-
-`
+// const BigData = styled.div`
+//   text-align: center;
+//   margin-top: 6px;
+// `
 
 const BigValue = styled.div`
   font-size: 5em;
