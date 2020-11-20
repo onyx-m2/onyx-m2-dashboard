@@ -26,7 +26,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
 export default function App() {
 
   const { grids, modified, saving, saveModified } = useContext(CMS)
-  const { dbc, freeze } = useContext(M2)
+  const { transport, dbc } = useContext(M2)
   const [ appIsOnline, appLatency ] = usePingPongState(1000, 2000)
   const [ m2IsOnline, m2Latency, m2Rate ] = useStatusState()
   const isSunUp = useSignalState('UI_isSunUp', true)
@@ -36,10 +36,10 @@ export default function App() {
   const drag = useDrag(({ event, tap, down, movement: [dx] }) => {
     const { style } = panelRef.current
     let x = clamp(panelPos.current + dx, 0, 150)
-    freeze(true)
+    transport.pause()
     if (!down) {
       x = panelPos.current = (x > 75) ? 150 : 0
-      freeze(false)
+      transport.resume()
       if (!tap) {
         event.stopPropagation()
       }

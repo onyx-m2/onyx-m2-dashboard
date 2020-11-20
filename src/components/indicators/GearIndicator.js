@@ -7,16 +7,16 @@ import { FadeableComponent } from '../Base'
 export default function GearIndicator(props) {
   const [gear, values] = useNamedValuesSignalState('DI_gear', 'SNA')
   var visible = true
-  if (gear == values.SNA || gear == values.INVALID) {
+  if (gear === values.SNA || gear === values.INVALID) {
     visible = false
   }
   return (
     <FadeableComponent {...props} visible={visible}>
       <GearSelectionGrid  rows='1' columns='repeat(4, 1fr)'>
-        <GearDisplay selected={gear == values.P}>P</GearDisplay>
-        <GearDisplay selected={gear == values.R}>R</GearDisplay>
-        <GearDisplay selected={gear == values.N}>N</GearDisplay>
-        <GearDisplay selected={gear == values.D}>D</GearDisplay>
+        <GearDisplay selected={gear === values.P}>P</GearDisplay>
+        <GearDisplay selected={gear === values.R}>R</GearDisplay>
+        <GearDisplay selected={gear === values.N}>N</GearDisplay>
+        <GearDisplay selected={gear === values.D}>D</GearDisplay>
       </GearSelectionGrid>
     </FadeableComponent>
   )

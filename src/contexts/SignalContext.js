@@ -11,8 +11,8 @@ export const SignalContext = createContext()
  */
 export function SignalProvider(props) {
   const { children } = props
-  const { dbc, send, listeners } = useContext(M2)
-  if (!listeners) {
+  const { transport, dbc } = useContext(M2)
+  if (!transport) {
     throw new Error('M2Provider is missing in render tree')
   }
 
@@ -24,7 +24,7 @@ export function SignalProvider(props) {
       signalListeners = allSignalsListeners[mnemonic] = []
     }
     if (signalListeners.length === 0) {
-      send('subscribe', [mnemonic])
+      transport.send('subscribe', [mnemonic])
     }
     signalListeners.push(handler)
   }
@@ -37,7 +37,7 @@ export function SignalProvider(props) {
         signalListeners.splice(index, 1)
       }
       if (signalListeners.length === 0) {
-        send('unsubscribe', [mnemonic])
+        transport.send('unsubscribe', [mnemonic])
         delete allSignalsListeners[mnemonic]
       }
     }
@@ -53,19 +53,19 @@ export function SignalProvider(props) {
         }
       })
     }
-    listeners.addEventListener('signal', handleSignal)
-    return () => listeners.removeEventListener('signal', handleSignal)
+    transport.addEventListener('signal', handleSignal)
+    return () => transport.removeEventListener('signal', handleSignal)
   }, [dbc])
 
   // handle reconnects by re-subscribing to the signals we require
   useEffect(() => {
     function handleHello() {
       const signals = Object.keys(allSignalsListeners)
-      send('subscribe', signals)
+      transport.send('subscribe', signals)
     }
-    listeners.addEventListener('hello', handleHello)
+    transport.addEventListener('hello', handleHello)
 
-    return () => listeners.removeEventListener('hello', handleHello)
+    return () => transport.removeEventListener('hello', handleHello)
   }, [dbc])
 
   return (

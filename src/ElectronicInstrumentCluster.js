@@ -141,6 +141,7 @@ export default function ElectronicInstrumentCluster(props) {
   const theme = INSTRUMENTS_THEME
   const displayOn = useSignalState('UI_displayOn', 0)
   const [ m2IsOnline ] = useStatusState({forceOnlineKey: 'pageup', forceOfflineKey: 'pagedown'})
+
   const speed = useSignalState('DI_uiSpeed', 0)
   const odometer = useSignalState('DI_odometer', 0)
 

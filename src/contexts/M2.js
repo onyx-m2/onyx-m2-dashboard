@@ -11,47 +11,9 @@ export default M2
  * @param {*} props
  */
 export function M2Provider(props) {
-  const { dbc, children } = props
-  const listeners = new EventTarget()
-
-  let frozen = false
-  const frozenEventQ = []
-
-  useEffect(() => {
-    function handleMessage(event) {
-      try {
-        const payload = JSON.parse(event.data)
-        const m2Event = new CustomEvent(payload.event, { detail: payload.data })
-        if (frozen) {
-          frozenEventQ.push(m2Event)
-        }
-        else {
-          listeners.dispatchEvent(m2Event)
-        }
-      }
-      catch {
-        throw new Error(`Cannot parse message from M2: ${event.data}`)
-      }
-    }
-    ws.addEventListener('message', handleMessage)
-    return () => ws.removeEventListener('message', handleMessage)
-  }, [ws])
-
-  function send(event, data) {
-    ws.send(JSON.stringify({ event, data }))
-  }
-
-  function freeze(_frozen) {
-    frozen = _frozen
-    if (!frozen) {
-      while (frozenEventQ.length != 0) {
-        listeners.dispatchEvent(frozenEventQ.shift())
-      }
-    }
-  }
-
+  const { transport, dbc, children } = props
   return (
-    <M2.Provider value={{ ws, dbc, listeners, send, freeze }}>
+    <M2.Provider value={{ transport, dbc }}>
       {children}
     </M2.Provider>
   )
@@ -66,7 +28,7 @@ export function M2Provider(props) {
  * to ping with a pong
  */
 export function usePingPongState(frequency, timeout) {
-  const { ws, send, listeners } = useContext(M2)
+  const { transport } = useContext(M2)
   const [ latency, setLatency ] = useState(0)
   const [ connected, setConnected ] = useState(false)
 
@@ -80,12 +42,12 @@ export function usePingPongState(frequency, timeout) {
         if (now - at >= timeout) {
           setConnected(false)
           at = 0
-          ws.reconnect()
+          transport.reconnect()
         }
       }
       else {
         at = now
-        send('ping')
+        transport.send('ping')
       }
       previousCheck = now
     }, frequency)
@@ -97,10 +59,10 @@ export function usePingPongState(frequency, timeout) {
       setLatency(Date.now() - at)
       at = 0
     }
-    listeners.addEventListener('pong', handlePong)
+    transport.addEventListener('pong', handlePong)
 
     return () => {
-      listeners.removeEventListener('pong', handlePong)
+      transport.removeEventListener('pong', handlePong)
       clearInterval(intervalId)
     }
   }, [ws, frequency, timeout])
@@ -113,7 +75,7 @@ export function usePingPongState(frequency, timeout) {
  * between itself and the server.
  */
 export function useStatusState(options) {
-  const { ws, listeners } = useContext(M2)
+  const { transport } = useContext(M2)
   const [ online, setOnline ] = useState(false)
   const [ ignoreOnlineStatus, setIgnoreOnlineStatus ] = useState(false)
   const [ latency, setLatency ] = useState(0)
@@ -137,9 +99,9 @@ export function useStatusState(options) {
       setLatency(latency)
       setRate(rate)
     }
-    listeners.addEventListener('status', handleStatus)
-    return () => listeners.removeEventListener('status', handleStatus)
-  }, [ws])
+    transport.addEventListener('status', handleStatus)
+    return () => transport.removeEventListener('status', handleStatus)
+  }, [transport])
 
   return [ online, latency, rate ]
 }
