@@ -1,8 +1,23 @@
 import React, { createContext, useEffect, useContext, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import dbcData from '../generated/dbc-data';
+import DBC from '../utils/DBC'
+import NativeTransport from '../transports/NativeTransport';
+import WebSocketTransport from '../transports/WebSocketTransport';
 
 const M2 = createContext()
 export default M2
+
+const dbc = new DBC(dbcData)
+
+let transport
+if (global.M2) {
+  console.info('M2 interface detected, using native transport')
+  transport = new NativeTransport(dbc)
+} else {
+  console.info('Using web socket transport')
+  transport = new WebSocketTransport()
+}
 
 /**
  * Context provider for the M2, which must be present in the render tree above the
@@ -10,7 +25,11 @@ export default M2
  * @param {*} props
  */
 export function M2Provider(props) {
-  const { transport, dbc, children } = props
+  const { config, children } = props
+  useEffect(() => {
+    transport.connect(config)
+  }, [config])
+
   return (
     <M2.Provider value={{ transport, dbc }}>
       {children}

@@ -1,5 +1,6 @@
 import React, { createContext, useState } from 'react'
-import { cms } from '../utils/services'
+import menuData from '../generated/menu-data';
+import signalsData from '../generated/signals-data';
 
 const CMS = createContext()
 export default CMS
@@ -13,9 +14,9 @@ const STATE_TOGGLED = 'toggled'
  */
 export function CMSProvider(props) {
   const { children } = props
-  const [ signals, setSignals ] = useState(props.signals)
-  const [ favourites, setFavourites ] = useState(props.signals.filter(s => s.favourite))
-  const [ grids, setGrids ] = useState(props.menu.grids.map(g => ({...g, slug: g.name.toLowerCase()})))
+  const [ signals, setSignals ] = useState(signalsData)
+  const [ favourites, setFavourites ] = useState(signalsData.filter(s => s.favourite))
+  const [ grids, setGrids ] = useState(menuData.grids.map(g => ({...g, slug: g.name.toLowerCase()})))
   const [ modified, setModified ] = useState(false)
   const [ saving, setSaving ] = useState(false)
 
@@ -77,18 +78,18 @@ export function CMSProvider(props) {
   }
 
   async function saveModified() {
-    const updates = []
+    //const updates = []
     setSaving(true)
-    grids.filter(g => g.modified).forEach(g => {
-      updates.push(cms.put(`/grids/${g.id}`, g))
-    })
-    signals.filter(s => s.state === STATE_NEW).forEach(s => {
-      updates.push(cms.post(`/signals`, s))
-    })
-    signals.filter(s => s.state === STATE_TOGGLED).forEach(s => {
-      updates.push(cms.put(`/signals/${s.id}`, { favourite: s.favourite }))
-    })
-    await Promise.all(updates)
+    // grids.filter(g => g.modified).forEach(g => {
+    //   updates.push(cms.put(`/grids/${g.id}`, g))
+    // })
+    // signals.filter(s => s.state === STATE_NEW).forEach(s => {
+    //   updates.push(cms.post(`/signals`, s))
+    // })
+    // signals.filter(s => s.state === STATE_TOGGLED).forEach(s => {
+    //   updates.push(cms.put(`/signals/${s.id}`, { favourite: s.favourite }))
+    // })
+    // await Promise.all(updates)
     setModified(false)
     setSaving(false)
   }

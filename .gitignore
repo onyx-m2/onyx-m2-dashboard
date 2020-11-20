@@ -11,6 +11,9 @@
 # production
 /build
 
+# generated sources
+/src/generated
+
 # misc
 .DS_Store
 .env

@@ -19,6 +19,13 @@ export default class Transport {
   }
 
   /**
+   * Connect the transport, passing in an implementation specific config. Optional
+   * for subclasses.
+   */
+  connect(config) {
+  }
+
+  /**
    * Listen for the specified `event` and notify caller by invoking
    * `listener`.
    */

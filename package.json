@@ -31,7 +31,9 @@
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "prestart": "node ./bin/refresh-generated-data",
     "start": "craco start",
+    "prebuild": "node ./bin/refresh-generated-data",
     "build": "craco build",
     "test": "craco test",
     "eject": "craco eject"

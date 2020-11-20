@@ -10,9 +10,6 @@ export default function Configuration() {
   const [ server, setServer ] = useState(process.env.REACT_APP_CONFIG_SERVER || '')
   const [ pin, setPin ] = useState(process.env.REACT_APP_CONFIG_PIN || '')
   const [ secure, setSecure ] = useState(true)
-  const [ cmsServer, setCmsServer ] = useState('cms.onyx-m2.net')
-  const [ cmsUsername, setCmsUsername ] = useState(process.env.REACT_APP_CONFIG_CMS_USERNAME || '')
-  const [ cmsPassword, setCmsPassword ] = useState(process.env.REACT_APP_CONFIG_CMS_PASSWORD || '')
 
   useEffect(() => {
     const config = load('config', 1)
@@ -20,21 +17,11 @@ export default function Configuration() {
       setServer(config.server)
       setPin(config.pin)
       setSecure(config.secure)
-      setCmsServer(config.cms?.server)
-      setCmsUsername(config.cms?.username)
-      setCmsPassword(config.cms?.password)
     }
   }, [])
 
   function handleSubmit(event) {
-    save('config', 1, {
-      server, pin, secure,
-      cms: {
-        server: cmsServer,
-        username: cmsUsername,
-        password: cmsPassword
-      }
-     })
+    save('config', 1, { server, pin, secure })
     window.location.href = '/'
   }
 
@@ -58,25 +45,6 @@ export default function Configuration() {
           </Form.Field>
           <Form.Field>
             <Checkbox checked={secure} onChange={(e) => setSecure(!secure)} label='Use secure connection (usually required)' />
-          </Form.Field>
-          <Header size='small'>CMS Settings
-            <Header.Subheader>
-              These settings indicate where your content management server is located, and optionally
-              your credentials for authenticated access. The credential fields may be left blank for
-              anonymous access. It is also fine to use the default CMS hosted at cms.onyx-m2.net.
-            </Header.Subheader>
-          </Header>
-          <Form.Field>
-            <label>Server</label>
-            <input value={cmsServer} onChange={(e) => setCmsServer(e.target.value)} placeholder='Enter cms hostname' />
-          </Form.Field>
-          <Form.Field>
-            <label>Username (Optional)</label>
-            <input value={cmsUsername} onChange={(e) => setCmsUsername(e.target.value)} placeholder='Enter cms username or leave blank' />
-          </Form.Field>
-          <Form.Field>
-            <label>Password (Optional)</label>
-            <input value={cmsPassword} onChange={(e) => setCmsPassword(e.target.value)} type='password' placeholder='Enter cms password or leave blank' />
           </Form.Field>
           <Button primary type='submit'>Continue</Button>
         </Form>

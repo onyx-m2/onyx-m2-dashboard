@@ -8,13 +8,11 @@ import Transport from './Transport'
 export default class WebSocketTransport extends Transport {
 
   /**
-   * Construct a web socket transport using the supplied config, which
+   * Connect to the web socket server using the supplied config, which
    * must include the `server` to connect to, the `pin` for authentication,
    * and a `secure` boolean indicating whether to use a secure connection.
    */
-  constructor(config) {
-    super()
-
+  connect(config) {
     const { server, pin, secure } = config
     const protocol = secure ? 'wss' : 'ws'
     this.ws = new ReconnectingWebSocket(`${protocol}://${server}/dashboard?pin=${pin}`, [], {
@@ -42,14 +40,18 @@ export default class WebSocketTransport extends Transport {
    * Reconnect the transport by cycling the connection.
    */
   reconnect() {
-    this.ws.reconnect()
+    if (this.ws) {
+      this.ws.reconnect()
+    }
   }
 
   /**
    * Send an event.
    */
   send(event, data) {
-    this.ws.send(JSON.stringify({ event, data }))
+    if (this.ws) {
+      this.ws.send(JSON.stringify({ event, data }))
+    }
   }
 
 }
