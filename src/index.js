@@ -8,22 +8,32 @@ import * as serviceWorker from './serviceWorker'
 import { M2Provider } from './contexts/M2'
 import { SignalProvider } from './contexts/SignalContext'
 import DBC from './utils/DBC'
-import { m2, cms, configure } from './utils/services'
+import { cms, configure } from './utils/services'
 import { Panel, Spinner } from './components/Base';
 import { DAY_THEME } from './theme';
 import { CMSProvider } from './contexts/CMS';
 import { load } from './utils/persistance';
 import Configuration from './components/Configuration';
+import ElectronicInstrumentCluster from './ElectronicInstrumentCluster';
 import { ThemeProvider } from 'styled-components';
 import { BrowserRouter } from 'react-router-dom';
+import NativeTransport from './transports/NativeTransport';
+import WebSocketTransport from './transports/WebSocketTransport';
+import axios from 'axios';
 
 /**
  * Load the DBC from the M2 server.
  */
-async function loadDBC(model) {
+async function loadDBC(config) {
+  const { server, pin, secure } = config
   while (true) {
     try {
-      const definitions = await m2.get('/dbc')
+      const protocol = secure ? 'https' : 'http'
+      const definitions = await axios(`${protocol}://${server}/dbc`, {
+        headers: {
+          'Authorization': pin
+        }
+      })
       return new DBC(definitions.data)
     }
     catch (e) {
@@ -55,7 +65,7 @@ async function loadContent(model) {
 /**
  * Initialize the application, and render once all the data is loaded.
  */
-async function init() {
+async function init(config) {
 
   // Render a loading screen until the actual initialization is done
   ReactDOM.render(
@@ -65,12 +75,13 @@ async function init() {
     document.getElementById('root')
   )
 
-  const dbc = await loadDBC()
+  const dbc = await loadDBC(config)
   const { signals, menu } = await loadContent()
+  const transport = new WebSocketTransport(config)
   ReactDOM.render(
     <React.StrictMode>
       <CMSProvider signals={signals} menu={menu}>
-        <M2Provider dbc={dbc}>
+        <M2Provider transport={transport} dbc={dbc}>
           <SignalProvider>
             <BrowserRouter>
               <App />
@@ -83,12 +94,55 @@ async function init() {
   )
 }
 
+/**
+ * Initialize the application in electronic instrument cluster mod, and render once
+ * all the data is loaded.
+ */
+async function initEIC(config) {
+  const dbc = await loadDBC(config)
+  let transport
+  if (global.M2) {
+    console.info('M2 interface detected, using native transport')
+    transport = new NativeTransport(dbc)
+   } else {
+    console.info('Using web socket transport')
+    transport = new WebSocketTransport(config)
+   }
+  ReactDOM.render(
+    <React.StrictMode>
+        <M2Provider transport={transport} dbc={dbc}>
+          <SignalProvider>
+            <ElectronicInstrumentCluster />
+          </SignalProvider>
+        </M2Provider>
+    </React.StrictMode>,
+    document.getElementById('root')
+  )
+}
+
+
 // Check for configuration requests, or first time run (super lazy implementation - but better than nothing?)
 async function checkConfig() {
-  const config = load('config', 1)
+  let config = load('config', 1)
+  if (!config && global.M2) {
+    config = {
+      server: global.M2.getPreference('server_hostname'),
+      pin: global.M2.getPreference('server_pin'),
+      secure: true,
+      cms: {}
+     }
+  }
   if (config && window.location.pathname !== '/configuration') {
     await configure(config)
-    init()
+
+    // monkey patch in the electronic instrument cluster mobile experiment here
+    // TODO: integrate this better if this works
+    if (window.location.host.startsWith('eic') || window.location.pathname === '/eic') {
+      initEIC(config)
+    }
+    else {
+      init(config)
+    }
   }
   else {
     ReactDOM.render(

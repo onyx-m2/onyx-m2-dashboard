@@ -15,7 +15,7 @@ const GRID_GAP = 20
  * @component
  */
 export default function TileGrid(props) {
-  const { freeze } = useContext(M2)
+  const { transport } = useContext(M2)
   const { rows, columns, children, onTileMoved, onTileTapped } = props
 
   const placeholderRef = useRef(null)
@@ -32,7 +32,7 @@ export default function TileGrid(props) {
     }
     if (onTileMoved) {
       if (down) {
-        freeze(true)
+        transport.pause()
         if (dx || dy) {
           setPlaceholdersVisible(true)
         }
@@ -40,7 +40,7 @@ export default function TileGrid(props) {
         style.transform = `translate3d(${dx}px, ${dy}px, 0)`
       } else {
         setPlaceholdersVisible(false)
-        freeze(false)
+        transport.resume()
         style.zIndex = 0
         style.transform = `translate3d(0, 0, 0)`
         const { clientWidth: cellWidth, clientHeight: cellHeight } = placeholderRef.current

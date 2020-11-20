@@ -9,7 +9,7 @@ export var ws
 
 /**
  * M2 server API
- * CRUS access to data stored on the server
+ * CRUD access to data stored on the server
  */
 export var m2
 
@@ -23,18 +23,6 @@ export async function configure(config) {
   const { server, pin, secure } = config
   const httpProtocol = secure ? 'https' : 'http'
   const wsProtocol = secure ? 'wss' : 'ws'
-
-  ws = new ReconnectingWebSocket(`${wsProtocol}://${server}/dashboard?pin=${pin}`, [], {
-    maxReconnectionDelay: 1000
-  })
-  ws.binaryType = 'arraybuffer'
-
-  m2 = axios.create({
-    baseURL: `${httpProtocol}://${server}`,
-    headers: {
-      'Authorization': pin
-    }
-  })
 
   const cmsServer = config.cms.server || `cms.${server}`
   const cmsUrl = `${httpProtocol}://${cmsServer}`

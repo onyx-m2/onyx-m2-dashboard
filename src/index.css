@@ -13,3 +13,8 @@ body ::-webkit-scrollbar {
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+body {
+  overflow: hidden;
+  background-color: black;
+}

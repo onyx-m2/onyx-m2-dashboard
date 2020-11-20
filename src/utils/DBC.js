@@ -1,3 +1,5 @@
+// This is shared with server code, make a package?
+
 /**
  * Data access class to navigate DBC files, with fast lookup by slug, id, and mnemonic.
  */
@@ -33,7 +35,7 @@ export default class DBC {
    * @param {Object} message A message definition
    */
   addMessage(message) {
-    if (!this.getMessageFromId(message.id)) {
+    if (!this.getMessageFromId(message.bus, message.id)) {
       this.messages.push(message)
       this.indexMessage(message)
     }
@@ -52,8 +54,12 @@ export default class DBC {
    * Get the message that matches the specified id.
    * @param {Number} id
    */
-  getMessageFromId(id) {
-    return this.messageById[id]
+  getMessageFromId(bus, id) {
+    const message = this.messageById[id]
+    if (message && message.bus === bus) {
+      return message
+    }
+    return null
   }
 
   /**
@@ -141,6 +147,15 @@ export default class DBC {
       }
     }
     return signals
+  }
+
+  decodeSignal(bitView, signal) {
+    try {
+      const val = bitView.getBits(signal.start, signal.length, signal.signed)
+      return signal.offset + signal.scale * val
+    } catch {
+      return NaN
+    }
   }
 
   getSignalMessage(mnemonic) {

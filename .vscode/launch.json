@@ -10,6 +10,13 @@
       "request": "launch",
       "url": "http://localhost:4000",
       "webRoot": "${workspaceRoot}/src"
+    },
+    {
+      "type": "android-webview",
+      "request": "attach",
+      "name": "Android WebView",
+      "application": "com.onyx.m2.relay",
+      "webRoot": "${workspaceFolder}"
     }
   ]
 }

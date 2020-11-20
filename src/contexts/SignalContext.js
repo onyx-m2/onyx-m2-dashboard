@@ -1,5 +1,6 @@
 import M2 from './M2'
 import React, { createContext, useContext, useEffect, useState } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 export const SignalContext = createContext()
 
@@ -10,8 +11,8 @@ export const SignalContext = createContext()
  */
 export function SignalProvider(props) {
   const { children } = props
-  const { dbc, send, listeners } = useContext(M2)
-  if (!listeners) {
+  const { transport, dbc } = useContext(M2)
+  if (!transport) {
     throw new Error('M2Provider is missing in render tree')
   }
 
@@ -23,7 +24,7 @@ export function SignalProvider(props) {
       signalListeners = allSignalsListeners[mnemonic] = []
     }
     if (signalListeners.length === 0) {
-      send('subscribe', [mnemonic])
+      transport.send('subscribe', [mnemonic])
     }
     signalListeners.push(handler)
   }
@@ -36,7 +37,7 @@ export function SignalProvider(props) {
         signalListeners.splice(index, 1)
       }
       if (signalListeners.length === 0) {
-        send('unsubscribe', [mnemonic])
+        transport.send('unsubscribe', [mnemonic])
         delete allSignalsListeners[mnemonic]
       }
     }
@@ -52,19 +53,19 @@ export function SignalProvider(props) {
         }
       })
     }
-    listeners.addEventListener('signal', handleSignal)
-    return () => listeners.removeEventListener('signal', handleSignal)
+    transport.addEventListener('signal', handleSignal)
+    return () => transport.removeEventListener('signal', handleSignal)
   }, [dbc])
 
   // handle reconnects by re-subscribing to the signals we require
   useEffect(() => {
     function handleHello() {
       const signals = Object.keys(allSignalsListeners)
-      send('subscribe', signals)
+      transport.send('subscribe', signals)
     }
-    listeners.addEventListener('hello', handleHello)
+    transport.addEventListener('hello', handleHello)
 
-    return () => listeners.removeEventListener('hello', handleHello)
+    return () => transport.removeEventListener('hello', handleHello)
   }, [dbc])
 
   return (
@@ -93,6 +94,11 @@ export function useSignalState(mnemonic, initialValue) {
   return value
 }
 
+/**
+ *
+ * @param {*} mnemonic
+ * @param {*} decimals
+ */
 export function useSignalDisplay(mnemonic, decimals) {
   decimals = decimals === undefined ? 2 : decimals
 
@@ -120,3 +126,55 @@ export function useSignalDisplay(mnemonic, decimals) {
   }
   return { name, value, units }
 }
+
+/**
+ *
+ * @param {*} mnemonic
+ * @param {*} initialValue
+ */
+export function useNamedValuesSignalState(mnemonic, initialValue) {
+  const { dbc } = useContext(M2)
+  const definition = dbc.getSignal(mnemonic)
+  const state = useSignalState(mnemonic, definition.namedValues[initialValue])
+  return [ state, definition.namedValues ]
+}
+
+
+/**
+ * Hook that provides hotkey simulation for signals. The idea is to use this to
+ * test applications without having to test everything in car to get the signal
+ * values to change.
+ *
+ * The simulation works by associating a hotkey with a specific signal and value.
+ * Hitting the hotkey will call the listeners is the same way a real signal
+ * would.
+ *
+ *  TODO: update docs now that it's the signal format
+ *
+ * The config is an array of arrays, the latter of which containing, in order:
+ * 1. the key that should trigger the signal
+ * 2. the mnemonic of the signal to trigger
+ * 3. the value to set the signal to, which can be blank to have the
+ *   simulation send a random value (but in range)
+ *
+ * For example, to setup a simulation to turn on the display with the 'd' key:
+ * ```
+ * useSignalHotkeySimulation([
+ *   ['d', [['UI_displayOn', 1]]
+ * ])
+ * ```
+ * @param {*} config
+ */
+export function useSignalHotkeySimulation(config) {
+  const { dbc, listeners } = useContext(M2)
+  const hotkeys = Object.keys(config).join()
+
+  useHotkeys(hotkeys, (_, ev) => {
+    const detail = config[ev.key].map(kv => (typeof kv[1] === 'string') ?
+      [kv[0], dbc.getSignal(kv[0]).namedValues[kv[1]]] : kv)
+
+    listeners.dispatchEvent(new CustomEvent('signal', {detail}))
+  })
+}
+
+
