@@ -166,14 +166,14 @@ export function useNamedValuesSignalState(mnemonic, initialValue) {
  * @param {*} config
  */
 export function useSignalHotkeySimulation(config) {
-  const { dbc, listeners } = useContext(M2)
+  const { dbc, transport } = useContext(M2)
   const hotkeys = Object.keys(config).join()
 
   useHotkeys(hotkeys, (_, ev) => {
-    const detail = config[ev.key].map(kv => (typeof kv[1] === 'string') ?
+    const data = config[ev.key].map(kv => (typeof kv[1] === 'string') ?
       [kv[0], dbc.getSignal(kv[0]).namedValues[kv[1]]] : kv)
 
-    listeners.dispatchEvent(new CustomEvent('signal', {detail}))
+    transport.dispatchEvent('signal', data)
   })
 }
 
