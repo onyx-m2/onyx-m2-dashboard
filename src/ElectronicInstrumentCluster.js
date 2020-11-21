@@ -243,7 +243,7 @@ export default function ElectronicInstrumentCluster(props) {
   return (
     <ThemeProvider theme={theme}>
       <Display>
-      <Grid rows='repeat(7, 48px)' columns='repeat(15, 48px)'>
+      <Grid rows='repeat(7, 48px)' columns='repeat(14, 48px)'>
         {/* <Grid rows='48px 48px 48px 48px 48px 1px 48px 48px'
               columns='48px 48px 48px 48px 48px 48px 48px 1px 48px 48px 48px 48px 48px 48px 48px'> */}
           <GridContextProvider cellWidth={48} cellHeight={48} gapSize={8}>
@@ -359,6 +359,7 @@ const Display = styled.div`
   height: 393px; //100vh;
   width: 786px; // height * 2
   padding: 4px;
+  overflow: hidden;
   background-color: black;
 `
 
