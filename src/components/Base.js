@@ -118,6 +118,7 @@ export const Button = styled.button`
 `
 
 export const FadeableComponent = styled.div`
+  position: relative;
   opacity: ${props => props.visible ? 1 : 0};
   transition: opacity 0.3s ease;
   /* visibility: ${props => props.visible ? 'visible' : 'hidden'}; */

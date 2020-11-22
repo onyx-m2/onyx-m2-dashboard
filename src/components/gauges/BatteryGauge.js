@@ -70,6 +70,7 @@ const StateOfChargeDisplay = styled.div`
 
 const StateOfCharge = styled.span`
   font-size: ${props => props.theme.font.size.large};
+  font-family: 'Gotham Light';
 `
 
 // const ColdModeSOCDisplay = styled.div`

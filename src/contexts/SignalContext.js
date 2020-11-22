@@ -99,11 +99,11 @@ export function useSignalState(mnemonic, initialValue) {
  * @param {*} mnemonic
  * @param {*} decimals
  */
-export function useSignalDisplay(mnemonic, decimals) {
+export function useSignalDisplay(mnemonic, decimals, defaultValue) {
   decimals = decimals === undefined ? 2 : decimals
 
   const { dbc } = useContext(M2)
-  const signalValue = useSignalState(mnemonic, '--')
+  const signalValue = useSignalState(mnemonic, defaultValue || '--')
 
   let value = signalValue
   if (typeof(value) === 'number') {

@@ -9,7 +9,7 @@ export default function BrakingIndicator(props) {
   const [state, values] = useNamedValuesSignalState('VCLEFT_brakeLightStatus', 'SNA')
   return (
     <FadeableComponent {...props} visible={state === values.ON}>
-      <HandbrakeIcon width="100%" height="100%" fill={theme.indicator.red} />
+      <HandbrakeIcon width="100%" height="100%" strokeWidth='30' stroke={theme.indicator.red} />
     </FadeableComponent>
   )
 }

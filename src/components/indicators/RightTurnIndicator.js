@@ -9,7 +9,7 @@ export default function RightTurnIndicator(props) {
   const [state, states] = useNamedValuesSignalState('VCRIGHT_turnSignalStatus', 'SNA')
   return (
     <FadeableComponent {...props} visible={state === states.ON}>
-      <RightArrowIcon width="100%" height="100%" fill={theme.indicator.green} />
+      <RightArrowIcon width="100%" height="100%" strokeWidth='30' stroke={theme.indicator.green} />
     </FadeableComponent>
   )
 }

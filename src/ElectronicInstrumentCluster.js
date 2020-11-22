@@ -1,6 +1,5 @@
 import React from 'react'
 
-import CircularGauge, { Font, Geometry, Range, RangeContainer, Scale, Label, Tick, ValueIndicator, Animation } from 'devextreme-react/circular-gauge';
 
 import { Grid, Cell } from 'styled-css-grid'
 import { INSTRUMENTS_THEME } from './theme'
@@ -8,7 +7,10 @@ import { INSTRUMENTS_THEME } from './theme'
 import OnyxLogo from './assets/onyx.svg'
 
 import styled, { ThemeProvider } from 'styled-components';
-import { useSignalHotkeySimulation, useSignalState } from './contexts/SignalContext';
+import { useSignalDisplay, useSignalHotkeySimulation, useSignalState } from './contexts/SignalContext';
+import { useStatusState } from './contexts/M2';
+import { GridContextProvider } from './contexts/GridContext';
+
 import BatteryGauge from './components/gauges/BatteryGauge'
 import LaneKeepingGauge from './components/gauges/LaneKeepingGauge'
 import TirePressureDisplay from './components/displays/TirePressureDisplay'
@@ -17,52 +19,8 @@ import BreakingIndicator from './components/indicators/BrakingIndicator'
 import LeftTurnIndicator from './components/indicators/LeftTurnIndicator'
 import RightTurnIndicator from './components/indicators/RightTurnIndicator'
 import GearIndicator from './components/indicators/GearIndicator';
-import { useStatusState } from './contexts/M2';
-import { GridContextProvider } from './contexts/GridContext';
-
-//if (global.M2) {
-  //THIS WORKS!!!!!
-  //setTimeout(() => global.M2.sendCommand(JSON.stringify([1,1,0])), 5000)
-  //global.addEventListener('m2', ({ detail: [ ts, bus, id, data ] }) => {
-  //  console.log(`ts: ${ts}, bus: ${bus}, id: ${id}, data: ${data}`)
-    //
-  //   const bits = new BitView(data)
-  //   const def = dbc.getMessageFromId(bus, id)
-  //   if (!def) {
-  //     return log.warn(`No definition for message ${id} on bus ${bus}`)
-  //   }
-
-  //   const ingress = {}
-  //   if (def.signals) {
-  //     def.signals.forEach(s => {
-  //       ingress[s.mnemonic] = dbc.decodeSignal(bits, s)
-  //     })
-  //   }
-  //   if (def.multiplexor) {
-  //     const multiplexId = ingress[def.multiplexor.mnemonic] = dbc.decodeSignal(bits, def.multiplexor)
-  //     const multiplexed = def.multiplexed[multiplexId]
-  //     if (multiplexed) {
-  //       multiplexed.forEach(s => {
-  //         ingress[s.mnemonic] = dbc.decodeSignal(bits, s)
-  //       })
-  //     } else {
-  //       log.warn(`Message ${def.mnemonic} doesn't have a multiplexed signal for ${multiplexId}`)
-  //     }
-  //     const subscribedSignals = ws.subscriptions.filter(s => s in ingress)
-  //     const oneShotSignals = ws.oneShotSignals.filter(s => s in ingress)
-  //     const signals = [...new Set([...subscribedSignals, ...oneShotSignals])].map(s => [s, ingress[s]])
-  //     if (signals.length > 0) {
-  //       sendJSON(ws, 'signal', signals) // <----------- this becomes listeners.dispatchEvent(m2Event)
-  //     }
-  //     ws.oneShotSignals = ws.oneShotSignals.filter(s => !oneShotSignals.includes(s))
-
-  //   }
-//  })
-//}
-
-//M2.onMessage = function(ts, bus, id, data) {
-
-//}
+import SpeedGauge from './components/gauges/SpeedGauge'
+import PowerGauge from './components/gauges/PowerGauge';
 
 // Trip meter could be "display" with clock (arrival time) and hourglass (time to dest)
 
@@ -131,8 +89,6 @@ import { GridContextProvider } from './contexts/GridContext';
 // 9. PTC kW
 // 10. trip meter?
 
-
-
 /**
  * Component that displays ...
  * @component
@@ -142,12 +98,10 @@ export default function ElectronicInstrumentCluster(props) {
   //const displayOn = useSignalState('UI_displayOn', 0)
   const [ m2IsOnline ] = useStatusState({forceOnlineKey: 'pageup', forceOfflineKey: 'pagedown'})
 
-  const speed = useSignalState('DI_uiSpeed', 0)
   const odometer = useSignalState('DI_odometer', 0)
 
-  const power = useSignalState('DI_elecPower', 0)
-  const drivePower = useSignalState('DI_sysDrivePowerMax', 240)
-  const regenPower = useSignalState('DI_sysRegenPowerMax', 60)
+  const { value: gearValue, units: gearName } = useSignalDisplay('DI_gear', 0, '1')
+  const gear = (gearValue > 0 && gearValue < 7) ? gearName : 'P'
 
   useSignalHotkeySimulation({
 
@@ -196,20 +150,6 @@ export default function ElectronicInstrumentCluster(props) {
   const ready = odometer > 0
   const consumption = 140
 
-  var speedColour = theme.indicator.white
-  if (speed > 160) {
-    speedColour = theme.indicator.red
-  } else if (speed > 120) {
-    speedColour = theme.indicator.orange
-  } else if (speed > 100) {
-    speedColour = theme.indicator.yellow
-  }
-
-  var powerColour = theme.indicator.white
-  if (power < 0) {
-    powerColour = theme.indicator.green
-  }
-
   // this would/will be relevant with a permanent installation, not with a phone
   // you take with you
   // if (!displayOn) {
@@ -243,44 +183,11 @@ export default function ElectronicInstrumentCluster(props) {
   return (
     <ThemeProvider theme={theme}>
       <Display>
-      <Grid rows='repeat(7, 48px)' columns='repeat(14, 48px)'>
-        {/* <Grid rows='48px 48px 48px 48px 48px 1px 48px 48px'
-              columns='48px 48px 48px 48px 48px 48px 48px 1px 48px 48px 48px 48px 48px 48px 48px'> */}
+        <Grid rows='repeat(7, 48px)' columns='repeat(14, 48px)'>
           <GridContextProvider cellWidth={48} cellHeight={48} gapSize={8}>
 
             {/* Speed Gauge */}
-            { ready &&
-              <Cell as={GaugeCLuster} left={1} top={1} width={6} height={5}>
-                <CircularGauge value={speed} containerBackgroundColor={theme.background.component} >
-                  <Animation enabled={true} />
-                  <Scale startValue={0} endValue={200} tickInterval={20}>
-                    <Label useRangeColors={true} indentFromTick={-1}>
-                      <Font size={20} />
-                    </Label>
-                    <Tick length={10} width={2} color={theme.background.component} />
-                  </Scale>
-                  <RangeContainer width={10}>
-                    <Range startValue={0} endValue={99} color={theme.scale.white} />
-                    <Range startValue={100} endValue={119} color={theme.scale.yellow} />
-                    <Range startValue={120} endValue={159} color={theme.scale.orange} />
-                    <Range startValue={160} endValue={200} color={theme.scale.red} />
-                  </RangeContainer>
-                  <Geometry startAngle={225} endAngle={315} />
-                  <ValueIndicator
-                    type="twoColorNeedle"
-                    secondFraction={0.34}
-                    color="none"
-                    secondColor={speedColour}
-                    width={6}
-                    offset={10}
-                  />
-                </CircularGauge>
-                <CircularGaugeUnits>km/h</CircularGaugeUnits>
-                <CircularGaugeValue colour={speedColour}>{Math.round(speed)}</CircularGaugeValue>
-                <CircularGaugeSubUnits>km</CircularGaugeSubUnits>
-                <CircularGaugeSubValue>{Math.round(odometer).toLocaleString()}</CircularGaugeSubValue>
-              </Cell>
-            }
+            <Cell as={SpeedGauge} visible={ready} left={1} top={1} width={6} height={5} />
 
             {/* Top indicators */}
             <Cell as={LaneKeepingGauge} left={6} top={1} width={4} />
@@ -297,37 +204,8 @@ export default function ElectronicInstrumentCluster(props) {
             <Cell as={BreakingIndicator} top={4} left={7} width={2} />
             <Cell as={GearIndicator} top={5} left={7} width={2} />
 
-            {/* Power gauge */}
-            { ready &&
-              <Cell as={GaugeCLuster} left={9} top={1} width={6} height={5}>
-                <CircularGauge value={power} containerBackgroundColor={theme.background.component}>
-                  <Animation enabled={false} />
-                  <Scale startValue={-regenPower} endValue={drivePower} tickInterval={30}>
-                    <Label useRangeColors={true} indentFromTick={-1}>
-                      <Font size={20} />
-                    </Label>
-                    <Tick color={theme.background.component} length={10} width={4} />
-                  </Scale>
-                  <RangeContainer width={10}>
-                    <Range startValue={-regenPower} endValue={-1} color={theme.scale.green} />
-                    <Range startValue={0} endValue={drivePower} color={theme.scale.white} />
-                  </RangeContainer>
-                  <Geometry startAngle={225} endAngle={315} />
-                  <ValueIndicator
-                    type="twoColorNeedle"
-                    secondFraction={0.34}
-                    color="none"
-                    secondColor={powerColour}
-                    width={6}
-                    offset={10}
-                  />
-                </CircularGauge>
-                <CircularGaugeUnits>kW</CircularGaugeUnits>
-                <CircularGaugeValue colour={powerColour}>{Math.abs(Math.round(power))}</CircularGaugeValue>
-                <CircularGaugeSubUnits>Wh/km</CircularGaugeSubUnits>
-                <CircularGaugeSubValue>{consumption}</CircularGaugeSubValue>
-              </Cell>
-            }
+            {/* Power Gauge */}
+            <Cell as={PowerGauge} visible={ready} left={9} top={1} width={6} height={5} />
 
             {/* Display divider */}
             <Cell style={{overflow: 'hidden'}} top={6} left={1} width={14} height={2}>
@@ -337,10 +215,12 @@ export default function ElectronicInstrumentCluster(props) {
             </Cell>
 
             {/* Data display */}
-            <Cell center middle top={7} left={2} width={4} height={1} style={{fontSize: '20px', color: theme.indicator.grey, marginTop: '-10px'}}>
+            {/* <Cell center middle top={7} left={2} width={4} height={1} style={{fontSize: '20px', color: theme.indicator.grey, marginTop: '-10px'}}>
               TIRE PRESSURE
             </Cell>
-            <Cell as={TirePressureDisplay} top={6} left={6} width={4} height={2} />
+            <Cell as={TirePressureDisplay} top={6} left={6} width={4} height={2} /> */}
+
+            <Cell as={BigValue} top={6} left={6} width={4} height={2}>{gear}</Cell>
 
             {/* Battery gauge */}
             <Cell as={BatteryGauge} left={11} top={6} width={4} height={2} />
@@ -363,51 +243,20 @@ const Display = styled.div`
   background-color: black;
 `
 
-const CircularGaugeValue = styled.div`
-  color: ${props => props.colour};
-  position: absolute;
+
+const BigValue = styled.div`
+  //color: ${props => props.colour};
+  margin-top: 50px;
+  color: white;
   text-align: center;
-  font-size: 64px;
-  top: 0;
-  width: ${props => props.theme.circular.size};
-  line-height: 300px;
-`
-
-const CircularGaugeUnits = styled.div`
-    color: ${props => props.theme.scale.white};
-    position: absolute;
-    top: 100px;
-    text-align: center;
-    font-size: 14px;
-    width: ${props => props.theme.circular.size};
-`
-
-const CircularGaugeSubValue = styled.div`
-    color: ${props => props.theme.indicator.white};
-    position: absolute;
-    text-align: center;
-    font-size: 24px;
-    bottom: -20px;
-    width: ${props => props.theme.circular.size};
-`
-
-const CircularGaugeSubUnits = styled.div`
-    color: ${props => props.theme.scale.white};
-    position: absolute;
-    bottom: 10px;
-    text-align: center;
-    font-size: 14px;
-    width: ${props => props.theme.circular.size};
+  font-family: 'Gotham Extra Light';
+  font-size: 84px;
+  //top: 0;
 `
 
 const GaugeCLuster = styled.div`
   position: relative;
 `
-// const FlexCell = styled(Cell)`
-//   display: flex;
-//   place-self: center;
-//   flex-direction: ${props => props.vertical ? 'column' : 'row'};
-// `
 
 const LogoDisplay = styled.div`
   height: 393px; //100vh;

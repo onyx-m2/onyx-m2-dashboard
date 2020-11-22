@@ -9,7 +9,7 @@ export default function LeftTurnIndicator(props) {
   const [state, states] = useNamedValuesSignalState('VCLEFT_turnSignalStatus', 'SNA')
   return (
     <FadeableComponent {...props} visible={state === states.ON}>
-      <LeftArrowIcon width="100%" height="100%" fill={theme.indicator.green} />
+      <LeftArrowIcon width="100%" height="100%" strokeWidth='30' stroke={theme.indicator.green} />
     </FadeableComponent>
   )
 }

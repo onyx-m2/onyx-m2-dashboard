@@ -48,7 +48,7 @@ export function Range(props) {
   x2 = (x2 + offset) * interval
 
   return (
-    <AnimatedRect x={x1} y={6} width={x2 - x1} height={8} fill={color} />
+    <AnimatedRect x={x1} y={6} width={x2 - x1} height={3} fill={color} />
   )
 }
 
@@ -67,12 +67,12 @@ export function Marker(props) {
   }
   x = (x + offset) * interval
   return (
-    <AnimatedPath d='M -14 20 L 0 0 L 14 20 Z'
+    <AnimatedPath d='M -8 16 L 0 0 L 8 16 Z'
       fill={color}
       stroke='black'
       stroke-width='2'
       stroke-linecap='square'
-      transform={`translate(${x}, 0)`}
+      transform={`translate(${x}, -2)`}
     />
   )
 }
