@@ -6,7 +6,7 @@ body ::-webkit-scrollbar {
 
 /* Set all font families to the native Tesla's 'Gotham' fonts */
 *, button, input, optgroup, select, textarea {
-  font-family: 'Gotham Light', sans-serif;
+  font-family: 'Gotham Medium', sans-serif;
 }
 
 /* Disable the ugly gray highlight when you tap anything in the UI */

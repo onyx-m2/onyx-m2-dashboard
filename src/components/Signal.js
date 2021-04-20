@@ -1,5 +1,5 @@
 import React from 'react'
-import { useSignalDisplay } from '../contexts/SignalContext'
+import { useSignalDisplay } from 'onyx-m2-react'
 import { Icon } from 'semantic-ui-react'
 import { Grid } from 'styled-css-grid'
 import styled from 'styled-components'
