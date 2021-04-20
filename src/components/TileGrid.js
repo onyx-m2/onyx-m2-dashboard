@@ -3,7 +3,7 @@ import { Grid, Cell } from 'styled-css-grid'
 import { useDrag } from 'react-use-gesture'
 import styled from 'styled-components'
 import { clamp } from '../utils/utils'
-import M2 from '../contexts/M2'
+import { M2 }  from 'onyx-m2-react'
 
 const DEFAULT_ROWS = 8
 const DEFAULT_COLUMNS = 6

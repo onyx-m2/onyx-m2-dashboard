@@ -1,29 +1,32 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react'
+import ReactDOM from 'react-dom'
 import 'semantic-ui-less/semantic.less'
-import './index.css';
-import App from './App';
+import './index.css'
+import App from './App'
 import * as serviceWorker from './serviceWorker'
 
-import { M2Provider } from './contexts/M2'
-import { SignalProvider } from './contexts/SignalContext'
-import { Panel } from './components/Base';
-import { DAY_THEME } from './theme';
-import { CMSProvider } from './contexts/CMS';
-import { load } from './utils/persistance';
-import Configuration from './components/Configuration';
-import ElectronicInstrumentCluster from './ElectronicInstrumentCluster';
-import { ThemeProvider } from 'styled-components';
-import { BrowserRouter } from 'react-router-dom';
+import { M2Provider, SignalProvider } from 'onyx-m2-react'
+import { Panel } from './components/Base'
+import { DAY_THEME } from './theme'
+import { CMSProvider } from './contexts/CMS'
+import { load } from './utils/persistance'
+import Configuration from './components/Configuration'
+import { ThemeProvider } from 'styled-components'
+import { BrowserRouter } from 'react-router-dom'
+import axios from 'axios'
+
+const dbcUrl = process.env.REACT_APP_CONFIG_DBCURL || 'https://raw.githubusercontent.com/onyx-m2/dbc/master/tesla_model3.dbc'
+console.log(`Loading DBC from url "${dbcUrl}"`)
 
 /**
  * Initialize the application, and render once all the data is loaded.
  */
 async function init(config) {
+  const { data: dbcFile } = await axios(dbcUrl)
   ReactDOM.render(
     <React.StrictMode>
       <CMSProvider>
-        <M2Provider config={config}>
+        <M2Provider config={config} dbcFile={dbcFile}>
           <SignalProvider>
             <BrowserRouter>
               <App />
@@ -36,22 +39,6 @@ async function init(config) {
   )
 }
 
-/**
- * Initialize the application in electronic instrument cluster mode, and render once
- * all the data is loaded.
- */
-async function initEIC(config) {
-  ReactDOM.render(
-    <React.StrictMode>
-        <M2Provider config={config}>
-          <SignalProvider>
-            <ElectronicInstrumentCluster />
-          </SignalProvider>
-        </M2Provider>
-    </React.StrictMode>,
-    document.getElementById('root')
-  )
-}
 
 let config = load('config', 1)
 
@@ -64,14 +51,7 @@ if (global.M2) {
     }
 }
 if (config && window.location.pathname !== '/configuration') {
-  // monkey patch in the electronic instrument cluster mobile experiment here
-  // TODO: integrate this better if this works
-  if (window.location.host.startsWith('eic') || window.location.pathname === '/eic') {
-    initEIC(config)
-  }
-  else {
-    init(config)
-  }
+  init(config)
 }
 else {
   // monkey patch in the configuration screen; pretty lazy, but works
