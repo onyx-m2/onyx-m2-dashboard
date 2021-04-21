@@ -10,8 +10,8 @@ export default [
 
   [ 'RCM_longitudinalAccel', 'slab', 4, 1 ],
   [ 'RCM_longitudinalAccelQF', 'pill', 6, 1 ],
-  [ 'RCM_lateralAccelRate', 'slab', 4, 2 ],
-  [ 'RCM_lateralAccelRateQF', 'pill', 6, 2 ],
+  [ 'RCM_lateralAccel', 'slab', 4, 2 ],
+  [ 'RCM_lateralAccelQF', 'pill', 6, 2 ],
   [ 'RCM_verticalAccel', 'slab', 4, 3 ],
   [ 'RCM_verticalAccelQF', 'pill', 6, 3 ],
 
