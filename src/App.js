@@ -9,13 +9,14 @@ import ConnectionPopup from './components/ConnectionPopup'
 import SignalsGrid from './components/SignalsGrid'
 import styled, { ThemeProvider } from 'styled-components'
 import { Grid } from 'styled-css-grid'
-import { Panel, Button } from './components/Base'
+import { Panel } from './components/Base'
 import { clamp } from './utils/utils'
 import { DAY_THEME, NIGHT_THEME } from './theme'
 import FavouritesGrid from './components/FavouritesGrid'
-import CMS from './contexts/CMS'
 import { useDebouncedCallback } from 'use-debounce'
 import { useHotkeys } from 'react-hotkeys-hook'
+
+import grids from './content/grids'
 
 /**
  * The App component uses the router to navigate to different panels in the app.
@@ -24,7 +25,7 @@ import { useHotkeys } from 'react-hotkeys-hook'
  */
 export default function App() {
 
-  const { grids, modified, saving, saveModified } = useContext(CMS)
+  //const { grids, modified, saving, saveModified } = useContext(CMS)
   const { transport, dbc } = useContext(M2)
   const [ appIsOnline, appLatency ] = usePingPongState(1000, 2000)
   const [ m2IsOnline, m2Latency, m2Rate ] = useStatusState()
@@ -86,10 +87,10 @@ export default function App() {
   return (
     <ThemeProvider theme={isSunUp ? DAY_THEME : NIGHT_THEME}>
       <NavMenu as={Grid} columns={1} gap={0} alignContent='start' onClick={handleNavMenuClick}>
-        {grids.map(grid => (
-          <NavMenuItem as={NavLink} to={`/grids/${grid.name.toLowerCase()}`} key={grid.id} tiles={grid.tiles} exact>
-            <Icon size='big' name={grid.icon} />
-            {grid.name}
+        {grids.map(({ name, slug, icon }) => (
+          <NavMenuItem as={NavLink} to={`/grids/${slug}`} key={slug} exact>
+            <Icon size='big' name={icon} />
+            {name}
           </NavMenuItem>
         ))}
         <NavMenuItem as={NavLink} to='/favourites'>
@@ -106,18 +107,13 @@ export default function App() {
         </div>
       </NavMenu>
       <Panel {...drag()} ref={panelRef}>
-        {modified &&
-          <SyncButton primary raised rounded onClick={() => saveModified()}>
-            <Icon loading={saving} name='sync' size='big' />
-          </SyncButton>
-        }
         <Switch>
           <Route exact path='/'>
-            <Redirect to={`/signals`} />
+            <Redirect to={`/favourites`} />
           </Route>
-          {grids.map(g => (
-            <Route exact key={g.id} path={`/grids/${g.slug}`}>
-              <SignalsGrid grid={g} />
+          {grids.map(({ slug, tiles, hash }) => (
+            <Route exact key={slug} path={`/grids/${slug}`}>
+              <SignalsGrid slug={slug} tiles={tiles} hash={hash} />
             </Route>
           ))}
           <Route exact path='/favourites'>
@@ -164,10 +160,4 @@ const NavMenuItem = styled.div`
   }
   min-width: 6em;
   padding: 20px;
-`
-
-const SyncButton = styled(Button)`
-  position: absolute;
-  z-index: 100;
-  right : 20px;
 `

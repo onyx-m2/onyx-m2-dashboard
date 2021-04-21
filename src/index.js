@@ -8,7 +8,7 @@ import * as serviceWorker from './serviceWorker'
 import { M2Provider, SignalProvider } from 'onyx-m2-react'
 import { Panel } from './components/Base'
 import { DAY_THEME } from './theme'
-import { CMSProvider } from './contexts/CMS'
+import { FavouritesProvider } from './contexts/Favourites'
 import { load } from './utils/persistance'
 import Configuration from './components/Configuration'
 import { ThemeProvider } from 'styled-components'
@@ -25,7 +25,7 @@ async function init(config) {
   const { data: dbcFile } = await axios(dbcUrl)
   ReactDOM.render(
     <React.StrictMode>
-      <CMSProvider>
+      <FavouritesProvider>
         <M2Provider config={config} dbcFile={dbcFile}>
           <SignalProvider>
             <BrowserRouter>
@@ -33,7 +33,7 @@ async function init(config) {
             </BrowserRouter>
           </SignalProvider>
         </M2Provider>
-      </CMSProvider>
+      </FavouritesProvider>
     </React.StrictMode>,
     document.getElementById('root')
   )

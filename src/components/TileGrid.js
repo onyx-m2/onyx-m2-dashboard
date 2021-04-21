@@ -10,7 +10,10 @@ const DEFAULT_COLUMNS = 6
 const GRID_GAP = 20
 
 /**
- * Component that displays ...
+ * Component that displays a generic draggable tile grid. It provides events for tiles
+ * moving and being tapped. Individual tiles should use `TileGrid.Tile` as their parent
+ * components to obtain the tile look, and only render their content.
+ *
  * @component
  */
 export default function TileGrid(props) {

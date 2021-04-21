@@ -22,6 +22,16 @@ To navigate between panels, drag the main panel left to reveal the navigation me
 
 ![Alt text](docs/navmenu.png?raw=true "Nav Menu")
 
+Additional "preset" panels may be added by modifying the grids in the `content` folder.
+The following preset grids are provided:
+
+  - `battery` Displays total pack energy, voltages, current, max temperature, and
+    a large sampling of individual brick voltages
+  - `drivetrain` Displays information about the drive inverter and motor
+  - `autopilot` Displays information about the state of autopilot, and shows how
+    its doing with lane keeping (the hero tiles), steering, braking, and torque control
+  - `track` Displays information you'd want at the track, g-pad data, temps, etc
+
 ## Design
 
 The interface is designed to resemble the Tesla UI. It used the same fonts and similar
@@ -38,48 +48,36 @@ Clone the repo and install.
   npm install
 ```
 
-Next configure the app by creating a `.env` file.
-
-```
-PORT=4000
-REACT_APP_M2_SECURE=false
-REACT_APP_M2_HOSTNAME=localhost:8080
-REACT_APP_M2_AUTHORIZATION=XXX
-```
-
-The `M2_HOSTNAME` is the hostname of the Onyx M2 Server to connect to, and `M2_SECURE`
-determines if you'll connect using SSL, which is more and more of a requirement but
-awkward for local development. The `M2_AUTHORIZATION` is a shared secret between the
-firmware, server, and app allowing every component to authenticate. (This could be
-improved.)
-
-Of course, for the car to be able to connect to the app, it needs to be available on
-the public internet. I recommend using `ngrok` for local development, although be
-warned you'll need two tunnels (one for this app and one for the server).
-
-Once all this is done, start the app
+The app is a standard `create-react-app` project, so everything works as you'd expect.
+To run locally in development mode:
 
 ```
   npm start
 ```
 
-I highly recommend running a production build in the car itself, see deployment section
-for suggestions on how to do this.
-
-## Deployment
-
-I currently use `AWS Amplitude` for deployment, and am really happy with it. It pretty
-much handles everything and can hook up to the GitHub repo for auto-deploying.
-
-TODO: provide step by step instructions
-
-If you'd rather server locally, use `serve` by doing `npm install -g serve` once, and
-then build and serve the app.
+To build a production version (that has service workers enabled for offline use and fast
+loading)
 
 ```
   npm run build
-  serve -s build -l 4000
 ```
 
-Note that the app was created with `create-react-app`, so any deployment tool that
-supports this very popular tooling should be compatible.
+To serve locally, use `serve` by doing `npm install -g serve` once, and
+then `serve -s build`.
+
+Upon first run, you'll be asked to configure the app. It needs an instance of the
+Onyx M2 server to connect to, and its pin.
+
+Of course, for the car to be able to connect to the app, it needs to be available on
+the public internet. I recommend using `ngrok` for local development, although be
+warned you'll need two tunnels (one for this app and one for the server).
+
+## Deployment
+
+There are many options that work well for this, as this is a `create-react-app`, and
+builds out of the box with easy-to-use services such as `AWS Amplify` and
+`Digital Ocean Static Apps`.
+
+If you'd like to run off of my instance (it'll always reflect what's in the `main`
+branch), please feel to so by simply pointing your browser at
+https://dashboard.onyx-m2.net and configure it to use your canbus server instance.

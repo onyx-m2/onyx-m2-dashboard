@@ -1,43 +1,55 @@
-import React, { useContext } from 'react'
+import React, { useState } from 'react'
+import { load, save } from '../utils/persistance'
 import { SignalPill, SignalSlab, SignalHero } from './Signal'
 import TileGrid from './TileGrid'
-import CMS from '../contexts/CMS'
 
 const sizes = {
   pill: {width: 1, height: 1},
   slab: {width: 2, height: 1},
+  bigslab: {width: 4, height: 1},
   hero: {width: 2, height: 2}
 }
 
 /**
- * Component that displays ...
+ * Component that displays a custom signal grid layout. The layouts are defined in
+ * the `contents` directory. This component will save positions as the tiles are
+ * modified, but any change to the original grid definition will override the
+ * user-defined changes. This works by comparing the tile's hash value to the stored
+ * one.
+ *
  * @component
  */
 export default function SignalsGrid(props) {
-  const { grid } = props
-  const { moveGridTile } = useContext(CMS)
+  const [ tiles, setTiles ] = useState(load(props.slug, props.hash) || props.tiles)
 
-  function signalTiles() {
-    return grid.tiles.filter(t => t.__component === 'tile-components.signal-tile')
+  function moveTile(signal, left, top) {
+    const updatedTiles = tiles.map(t => {
+      if (t.signal === signal) {
+        return { ...t, left, top }
+      }
+      return t
+    })
+    setTiles(updatedTiles)
+    save(props.slug, props.hash, updatedTiles)
   }
 
   return (
-    <TileGrid onTileMoved={(id, left, top) => moveGridTile(grid, id, left, top)} rows={grid.rows} columns={grid.columns}>
-      {signalTiles().map((t, i) => (
-        <TileGrid.Tile
-          key={t.id}
-          left={t.tile.left}
-          top={t.tile.top}
-          width={sizes[t.tile.displayType].width}
-          height={sizes[t.tile.displayType].height}>
+    <TileGrid onTileMoved={(signal, left, top) => moveTile(signal, left, top)}>
+      {tiles.map(({ signal, type, left, top, decimals }) => (
+        <TileGrid.Tile uppercase key={signal}
+          left={left}
+          top={top}
+          width={sizes[type].width}
+          height={sizes[type].height}>
           {(() => {
-            switch (t.tile.displayType) {
+            switch (type) {
               case 'pill':
-                return <SignalPill mnemonic={t.signal.mnemonic} />
+                return <SignalPill decimals={decimals} mnemonic={signal} />
               case 'slab':
-                return <SignalSlab caption={t.tile.caption} mnemonic={t.signal.mnemonic} showName={t.showSignalName} showUnits={t.showSignalUnits} />
+              case 'bigslab':
+                return <SignalSlab mnemonic={signal} />
               case 'hero':
-                return <SignalHero decimals={0} mnemonic={t.signal.mnemonic} />
+                return <SignalHero decimals={decimals}  mnemonic={signal} />
               // no default
             }
           })()}
@@ -46,31 +58,3 @@ export default function SignalsGrid(props) {
     </TileGrid>
   )
 }
-
-// const SignalTile = forwardRef((props, ref) => {
-//   const { caption, signal, selected } = props
-//   return (
-//     <Tile ref={ref} {...props} selected={selected} >
-//       <Signal mnemonic={signal.mnemonic} caption={caption || signal.name} />
-//     </Tile>
-//   )
-// })
-
-// const ComputedSignalTile = forwardRef((props, ref) => {
-//   const { caption, id, selected } = props
-//   const [ signal, setSignal ] = useState()
-//   useEffect(() => {
-//     const fetch = async () => {
-//       const { data } = await cms.get(`/signals/${id}`)
-//       setSignal(data)
-//     }
-//     fetch()
-//   }, [id])
-//   if (signal) {
-//     return (
-//       <Tile ref={ref} {...props} selected={selected} >
-//         <Signal mnemonic={signal.definition[0].value} caption={caption || signal.name} />
-//       </Tile>
-//     )
-//   }
-// })

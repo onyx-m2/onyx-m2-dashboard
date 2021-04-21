@@ -6,7 +6,7 @@ import { M2 } from 'onyx-m2-react'
 import { Grid } from 'styled-css-grid'
 import { ScrollContainer, Tile } from './Base'
 import styled from 'styled-components'
-import CMS from '../contexts/CMS'
+import Favourites from '../contexts/Favourites'
 
 /**
  * Component that displays a fullscreen panel that allows browsing all the messages
@@ -16,7 +16,7 @@ import CMS from '../contexts/CMS'
  */
 export default function SignalBrowser(props) {
   const { dbc } = useContext(M2)
-  const { isFavourite, toggleFavourite } = useContext(CMS)
+  const { isFavourite, toggleFavourite } = useContext(Favourites)
   const history = useHistory()
   const { categorySlug, messageSlug } = useParams()
   let category = dbc.getCategory(categorySlug)
@@ -48,9 +48,9 @@ export default function SignalBrowser(props) {
     }
   }
 
-  function onFavouriteToggled(e, signal) {
+  function onFavouriteToggled(e, mnemonic) {
     e.stopPropagation()
-    toggleFavourite(signal)
+    toggleFavourite(mnemonic)
   }
 
   const categories = dbc.getCategories()
@@ -75,8 +75,8 @@ export default function SignalBrowser(props) {
         ))}
       </ScrollContainer>
       <ScrollContainer as={Tile} uppercase>
-        {signals.map(s => (
-          <SignalSlab key={s.mnemonic} mnemonic={s.mnemonic} icon={isFavourite(s) ? 'olive star' : ''} onClick={(e) => onFavouriteToggled(e, s)} />
+        {signals.map(({ mnemonic }) => (
+          <SignalSlab key={mnemonic} mnemonic={mnemonic} icon={isFavourite(mnemonic) ? 'olive star' : ''} onClick={(e) => onFavouriteToggled(e, mnemonic)} />
         ))}
       </ScrollContainer>
     </Grid>
