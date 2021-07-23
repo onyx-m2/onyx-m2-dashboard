@@ -86,7 +86,7 @@ export default function App() {
 
   return (
     <ThemeProvider theme={isSunUp ? DAY_THEME : NIGHT_THEME}>
-      <NavMenu as={Grid} columns={1} gap={0} alignContent='start' onClick={handleNavMenuClick}>
+      <NavMenu as={Grid} columns={1} gap='0' alignContent='start' onClick={handleNavMenuClick}>
         {grids.map(({ name, slug, icon }) => (
           <NavMenuItem as={NavLink} to={`/grids/${slug}`} key={slug} exact>
             <Icon size='big' name={icon} />

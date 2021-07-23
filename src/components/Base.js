@@ -6,7 +6,8 @@ export const Panel = styled.div`
   height: 100vh;
   width: 100vw;
   z-index: 2;
-  padding: 10px 20px 20px 20px;
+  padding: 10px;
+  padding-right: 30px;  /* Obnoxious display bug since the infamous "christmas update" of 2020 */
   display: flex;
   background-color: ${props => props.theme.background.panel};
 `

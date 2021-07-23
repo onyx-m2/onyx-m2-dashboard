@@ -57,7 +57,7 @@ export default function SignalBrowser(props) {
   let messages = dbc.getCategoryMessages(categorySlug)
   let signals = dbc.getMessageSignals(message.mnemonic)
   return (
-    <Grid gap='20px' row={1} columns={3}>
+    <Grid gap='10px' row={1} columns={3}>
       <ScrollContainer as={Tile}>
         {categories.map(c => (
             <ListItem uppercase key={c.slug} selected={c.slug === category.slug} onClick={(e) => onCategorySelected(e, c.slug)}>
