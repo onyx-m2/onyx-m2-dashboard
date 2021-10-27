@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Tile } from './Base'
-import { Button, Header, Form, Checkbox } from 'semantic-ui-react'
+import { Button, Header, Form, Checkbox, Segment } from 'semantic-ui-react'
 import { save, load } from '../utils/persistance'
 
 export const CONFIG_VERSION = 2
@@ -33,7 +33,7 @@ export default function Configuration() {
       <Tile style={{padding: '20px'}}>
         <Header>CONFIGURATION</Header>
 
-      <p>
+      <Segment basic>
         <Form onSubmit={() => handleSubmit()}>
           <Header size='small'>Server Settings
             <Header.Subheader>
@@ -54,9 +54,9 @@ export default function Configuration() {
           </Form.Field>
           <Button primary type='submit'>Continue</Button>
         </Form>
-      </p>
+      </Segment>
 
-      <p>
+      <Segment basic>
         <Form>
           <Header size='small'>Bluetooth Settings
             <Header.Subheader>
@@ -69,7 +69,7 @@ export default function Configuration() {
           </Form.Field>
           <Button onClick={pairM2}>Pair Now</Button>
         </Form>
-      </p>
+      </Segment>
     </Tile>
 )
 }
