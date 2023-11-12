@@ -4,7 +4,7 @@
   "private": true,
   "repository": "onyx-m2/onyx-m2-dashboard",
   "dependencies": {
-    "axios": "^0.21.4",
+    "axios": "^1.6.0",
     "onyx-m2-react": "^0.0.10",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
