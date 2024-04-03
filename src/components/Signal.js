@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSignalDisplay } from 'onyx-m2-react'
 import { Icon } from 'semantic-ui-react'
-import { Grid } from 'styled-css-grid'
+import Grid from './Grid'
 import styled from 'styled-components'
 
 /**
@@ -13,7 +13,10 @@ export function SignalSlab(props) {
   const { name, value, units } = useSignalDisplay(mnemonic, decimals)
   return (
     <SignalGrid gap='10px' rows={1} columns={'2fr 1fr'} {...props}>
-      <div>{icon && <Icon name={icon} />}{caption || name}</div>
+      <div>
+        {icon && <Icon name={icon} />}
+        {caption || name}
+      </div>
       <Data>
         <Value>{value}</Value>
         <Units>{units}</Units>
@@ -123,7 +126,6 @@ const SignalGrid = styled(Grid)`
 const Data = styled.div`
   text-align: right;
   margin-top: 6px;
-
 `
 
 const Value = styled.div`
