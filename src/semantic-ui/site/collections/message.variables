@@ -4,6 +4,6 @@
 
 /* Make messages look more like the car's native ones, that is be round and no close
 button */
-@borderRadius: 100px;
+@borderRadius: 10px;
 @iconOpacity: 1;
 @closeOpacity: 0;

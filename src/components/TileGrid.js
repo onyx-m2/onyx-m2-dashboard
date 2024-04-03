@@ -111,7 +111,7 @@ TileGrid.Tile = styled.div`
     props.selected
       ? `0 0 0 4px ${props.theme.primary}`
       : '0 2px 4px 0 rgba(34, 36, 38, 0.12), 0 2px 10px 0 rgba(34, 36, 38, 0.15)'};
-  border-radius: 10px;
+  border-radius: 2px;
   border: none;
   user-select: none;
 `
@@ -129,7 +129,7 @@ const PlaceholderCell = styled(Cell).attrs(props => ({
   },
 }))`
   border: dashed ${props => props.theme.text.disabled} 2px;
-  border-radius: 10px;
+  border-radius: 2px;
 `
 PlaceholderCell.propTypes = {
   visible: PropTypes.bool,
