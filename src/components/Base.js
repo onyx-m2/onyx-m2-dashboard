@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import PropTypes from 'prop-types'
 
 export const Panel = styled.div`
   position: relative;
@@ -7,7 +8,6 @@ export const Panel = styled.div`
   width: 100vw;
   z-index: 2;
   padding: 10px;
-  padding-right: 30px;  /* Obnoxious display bug since the infamous "christmas update" of 2020 */
   display: flex;
   background-color: ${props => props.theme.background.panel};
 `
@@ -34,17 +34,20 @@ export const ScrollContainer = styled.div`
 `
 
 export const Tile = styled.div`
-  text-transform: ${props => props.uppercase ? 'uppercase' : 'none'};
+  text-transform: ${props => (props.uppercase ? 'uppercase' : 'none')};
   color: ${props => props.theme.text.dark};
   background: ${props => props.theme.background.component};
-  box-shadow: ${props => props.selected ?
-    `0 0 0 4px ${props.theme.primary}` :
-    '0 2px 4px 0 rgba(34, 36, 38, 0.12), 0 2px 10px 0 rgba(34, 36, 38, 0.15)'
-  };
+  box-shadow: ${props =>
+    props.selected
+      ? `0 0 0 4px ${props.theme.primary}`
+      : '0 2px 4px 0 rgba(34, 36, 38, 0.12), 0 2px 10px 0 rgba(34, 36, 38, 0.15)'};
   border-radius: 10px;
   border: none;
   user-select: none;
 `
+Tile.propTypes = {
+  uppercase: PropTypes.bool,
+}
 
 export const DraggableTile = styled(Tile)`
   cursor: grab;
@@ -58,7 +61,7 @@ export const Spinner = styled.div`
   margin: auto;
   width: ${props => props.size}px;
   height: ${props => props.size}px;
-  background-image: ${props => props.image ? 'url(' + props.image + ')' : ''};
+  background-image: ${props => (props.image ? 'url(' + props.image + ')' : '')};
   background-repeat: no-repeat;
   background-position: center;
 
@@ -78,8 +81,8 @@ export const Spinner = styled.div`
     position: absolute;
     top: 0;
     left: 0;
-    width: ${props => props.size}px;;
-    height: ${props => props.size}px;;
+    width: ${props => props.size}px;
+    height: ${props => props.size}px;
     animation: loader 0.8s linear;
     animation-iteration-count: infinite;
     border-radius: 200px;
@@ -100,10 +103,11 @@ export const Button = styled.button`
   min-height: 1em;
   border: none;
   vertical-align: baseline;
-  color: ${props => props.primary ? 'white' : props.theme.text.muted};
-  background-color: ${props => props.primary ? props.theme.primary : props.theme.background.button};
+  color: ${props => (props.primary ? 'white' : props.theme.text.muted)};
+  background-color: ${props =>
+    props.primary ? props.theme.primary : props.theme.background.button};
   margin: 0;
-  padding: 0.55em ${props => props.rounded ? 0.55 : 1.5}em 0.55em;
+  padding: 0.55em ${props => (props.rounded ? 0.55 : 1.5)}em 0.55em;
   text-transform: uppercase;
   text-shadow: none;
   font-weight: bold;
@@ -112,8 +116,9 @@ export const Button = styled.button`
   text-align: center;
   user-select: none;
   outline: 0;
-  border-radius: ${props => props.rounded ? '200px' : '10px'};
-  box-shadow: ${props => props.raised ?
-    '3px 7px 10px 0 rgba(34, 36, 38, 0.52)':
-    '0px 0px 0px 1px transparent inset, 0px 0em 0px 0px rgba(34, 36, 38, 0.15) inset'};
+  border-radius: ${props => (props.rounded ? '200px' : '10px')};
+  box-shadow: ${props =>
+    props.raised
+      ? '3px 7px 10px 0 rgba(34, 36, 38, 0.52)'
+      : '0px 0px 0px 1px transparent inset, 0px 0em 0px 0px rgba(34, 36, 38, 0.15) inset'};
 `

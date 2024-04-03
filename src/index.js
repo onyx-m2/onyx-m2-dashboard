@@ -1,5 +1,6 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+//import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import 'semantic-ui-less/semantic.less'
 import './index.css'
 import App from './App'
@@ -15,15 +16,17 @@ import { ThemeProvider } from 'styled-components'
 import { BrowserRouter } from 'react-router-dom'
 import axios from 'axios'
 
-const dbcUrl = process.env.REACT_APP_CONFIG_DBCURL || 'https://raw.githubusercontent.com/onyx-m2/dbc/master/tesla_model3.dbc'
+const dbcUrl =
+  process.env.REACT_APP_CONFIG_DBCURL ||
+  'https://raw.githubusercontent.com/onyx-m2/dbc/master/tesla_model3.dbc'
 console.log(`Loading DBC from url "${dbcUrl}"`)
 
 /**
  * Renders the app after loading the dbc file.
  */
-async function renderApp(config) {
+async function renderApp(root, config) {
   const { data: dbcFile } = await axios(dbcUrl)
-  ReactDOM.render(
+  root.render(
     <React.StrictMode>
       <FavouritesProvider>
         <M2Provider config={config} dbcFile={dbcFile}>
@@ -34,8 +37,7 @@ async function renderApp(config) {
           </SignalProvider>
         </M2Provider>
       </FavouritesProvider>
-    </React.StrictMode>,
-    document.getElementById('root')
+    </React.StrictMode>
   )
 }
 
@@ -43,14 +45,13 @@ async function renderApp(config) {
  * Renders the configuration page, allowing user to input settings
  * to run the app on their infrastructure.
  */
-function renderConfigurationPage() {
-  ReactDOM.render(
+function renderConfigurationPage(root) {
+  root.render(
     <ThemeProvider theme={DAY_THEME}>
       <Panel>
         <Configuration theme={DAY_THEME} />
       </Panel>
-    </ThemeProvider>,
-    document.getElementById('root')
+    </ThemeProvider>
   )
 }
 
@@ -74,32 +75,31 @@ async function getPairedBleDevice() {
  */
 async function initialize() {
   let config = load('config', CONFIG_VERSION)
+  let root = createRoot(document.getElementById('root'))
 
   // if native interface is available, allow it to override the config values
   if (global.M2) {
     config = {
       server: global.M2.getPreference('server_hostname'),
       pin: global.M2.getPreference('server_pin'),
-      secure: true
-      }
+      secure: true,
+    }
   }
   if (config && window.location.pathname !== '/configuration') {
     if (config.ble) {
       config.ble = await getPairedBleDevice()
       if (!config.ble) {
-        return renderConfigurationPage()
+        return renderConfigurationPage(root)
       }
     }
-    renderApp(config)
-  }
-  else {
+    renderApp(root, config)
+  } else {
     // monkey patch in the configuration screen; pretty lazy, but works
-    renderConfigurationPage()
+    renderConfigurationPage(root)
   }
 }
 
 initialize()
-
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
