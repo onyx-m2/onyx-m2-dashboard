@@ -17,6 +17,8 @@ import { useHotkeys } from 'react-hotkeys-hook'
 
 import grids from './content/grids'
 
+const displayMode = process.env.REACT_APP_DISPLAY_MODE || 'dark'
+
 /**
  * The App component uses the router to navigate to different panels in the app.
  * The app itself only provides the sidebar menu, the ability to swipe right to
@@ -87,8 +89,14 @@ export default function App() {
   // simulation on pc
   useHotkeys('pageup', () => cycleThroughPanels())
 
+  let theme = NIGHT_THEME
+  if (displayMode === 'light') {
+    theme = DAY_THEME
+  } else if (displayMode === 'auto') {
+    theme = isSunUp ? DAY_THEME : NIGHT_THEME
+  }
   return (
-    <ThemeProvider theme={isSunUp ? DAY_THEME : NIGHT_THEME}>
+    <ThemeProvider theme={theme}>
       <NavMenu as={Grid} columns={1} gap='0' alignContent='start' onClick={handleNavMenuClick}>
         {grids.map(({ name, slug, icon }) => (
           <NavMenuItem as={NavLink} to={`/grids/${slug}`} key={slug}>
